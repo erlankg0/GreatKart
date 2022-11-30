@@ -35,7 +35,7 @@ class Category(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('node', kwargs={"slug": self.slug})
+        return reverse('home', kwargs={"slug": self.slug})
 
     class Meta:
         db_table = 'category'
