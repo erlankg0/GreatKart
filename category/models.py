@@ -21,21 +21,16 @@ class Category(models.Model):
     description = models.CharField(
         max_length=255,
         verbose_name='Описание категории',
-        help_text='Описание категории'
-    )
-    image = models.ImageField(
-        verbose_name='Изображение категории',
-        help_text='Изображение категории',
-        upload_to=directory_path,
+        help_text='Описание категории',
         blank=True,
-        null=True
+        null=True,
     )
 
     def __str__(self):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('home', kwargs={"slug": self.slug})
+        return reverse('shop_by_category', kwargs={"slug": self.slug})
 
     class Meta:
         db_table = 'category'

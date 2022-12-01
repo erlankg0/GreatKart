@@ -15,6 +15,10 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/venv" />
+      <excludeFolder url="file://$MODULE_DIR$/media/categories/category_erkek saks gömlek uzunkol basic" />
+      <excludeFolder url="file://$MODULE_DIR$/media/categories/category_men's lacoste l005 leather color-pop sneakers" />
+      <excludeFolder url="file://$MODULE_DIR$/media/categories/category_shits" />
+      <excludeFolder url="file://$MODULE_DIR$/media/categories/category_shoes" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

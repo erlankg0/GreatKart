@@ -28,6 +28,14 @@ class Product(models.Model):
         verbose_name='Цена',
         help_text='Только позитивные числа'
     )
+    discount = models.BooleanField(
+        default=False,
+        verbose_name='Скидка'
+    )
+    discount_price = models.PositiveIntegerField(
+        verbose_name='Скидка',
+        help_text='Пишем сумму скидки'
+    )
     images = models.ImageField(
         verbose_name='Изображение продукта',
         help_text='Изображение категории',
@@ -64,13 +72,13 @@ class Product(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('', kwargs={"slug": self.slug})
-    
+        return reverse('detail_product', args=[self.category.slug, self.slug])
+
     def save(self, *args, **kwargs):
-        if self.stock == 0:
-            self.is_available = False
+        if self.discount:
+            self.price = self.price - self.discount_price
         super(Product, self).save(*args, **kwargs)
-    
+
     class Meta:
         ordering = ['-name', ]
         db_table = 'products'

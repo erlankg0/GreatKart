@@ -8,10 +8,10 @@ from store.models import Product
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     """Панель администрации измененный """
-    list_display = ('name', 'get_image', 'price', 'stock', 'modified_date', 'is_available',)
-    list_filter = ('name', 'price', 'stock', 'modified_date', 'is_available',)
+    list_display = ('name', 'get_image', 'price', 'discount_price', 'stock', 'modified_date', 'is_available',)
+    list_filter = ('name', 'price', 'discount_price', 'stock', 'modified_date', 'is_available',)
     prepopulated_fields = {'slug': ('name',)}
-    list_editable = ('price', 'stock',)
+    list_editable = ('price', 'discount_price', 'stock',)
 
     def get_image(self, obj):
         """
