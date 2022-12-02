@@ -24,10 +24,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cart.apps.AppConfig', # приложения корзины
+    'cart.apps.CartConfig',  # приложения корзины
     'category.apps.CategoryConfig',  # приложения category
     'store.apps.StoreConfig',
     'accounts.apps.AccountsConfig',  # приложения для управления аккаунтами
+    'mptt',
 ]
 
 MIDDLEWARE = [
@@ -55,6 +56,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'category.context_processors.get_categories_context',  # Собственый контекст процессор
+                'store.context_processors.get_categories_context_mptt',
             ],
         },
     },

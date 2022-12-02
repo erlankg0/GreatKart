@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load categories %}
 {% block content %}
     <section class="section-content padding-y bg">
         <div class="container">
@@ -70,7 +71,7 @@
                             {% if product.stock <= 0 %}
                                 <h2 class="text-danger">Нету в наличии</h2>
                             {% else %}
-                                <a href="/" class="btn  btn-primary"> <span
+                                <a href="{% url 'add_cart' product.id %}" class="btn  btn-primary"> <span
                                         class="text">Add to cart</span> <i class="fas fa-shopping-cart"></i> </a>
                             {% endif %}
 

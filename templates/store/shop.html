@@ -150,9 +150,9 @@
                                                class="title">{{ product.name }}</a>
                                             <div class="price-wrap mt-2">
                                                 <span class="price">${{ product.price }}</span>
-                                                {% if product.discount %}
+                                                {% if product.discount and product.discounted %}
                                                     <del class="price-old">
-                                                        ${{ product.discount_price|add:product.price }}</del>
+                                                        ${{ product.discounted }}</del>
                                                 {% endif %}
                                             </div> <!-- price-wrap.// -->
                                         </div>

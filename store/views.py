@@ -3,8 +3,7 @@ from django.views import View
 from django.views.generic import ListView, DetailView, TemplateView
 from django.views.generic.base import TemplateResponseMixin
 
-from store.models import Product
-from category.models import Category
+from store.models import Product, CategoryMPTT
 
 
 class HomeView(ListView):
@@ -32,7 +31,7 @@ class ShopByCategoryListView(ShopListView):
         """Дабавление дополнительных данных в context"""
         context = super(ShopByCategoryListView, self).get_context_data(**kwargs)
         print(self.kwargs['slug'])
-        context['get_category_name'] = Category.objects.get(
+        context['get_category_name'] = CategoryMPTT.objects.get(
             slug=self.kwargs['slug'])  # добавлю дополнительные данные
         return context
 
@@ -49,12 +48,11 @@ class ShopByCategoryListView(ShopListView):
 class DetailProduct(View):
     """Вывод одного(отдельного) продукта"""
 
-    def get(self, request, category_slug, product_slug):
+    def get(self, request, product_slug):
         """Плохой код надо исправить с DetailView"""
         try:
             """Не знаю как сделать мульти slug"""
             product = Product.objects.get(
-                category=Category.objects.get(slug=category_slug),
                 slug=product_slug,
             )
         except ConnectionError as Error:
