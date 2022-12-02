@@ -4,6 +4,7 @@ from django.views.generic import ListView, DetailView, TemplateView
 from django.views.generic.base import TemplateResponseMixin
 
 from store.models import Product, CategoryMPTT
+from store.forms import ProductForm
 
 
 class HomeView(ListView):
@@ -58,3 +59,7 @@ class DetailProduct(View):
         except ConnectionError as Error:
             raise ConnectionError("Link not Fount")
         return render(request, 'store/product_detail.html', context={'product': product})
+
+
+def forms(request):
+    return render(request, 'store/forms.html', {"form": ProductForm()})

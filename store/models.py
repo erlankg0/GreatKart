@@ -69,9 +69,6 @@ class Image(models.Model):
         verbose_name='Картинка'
     )
 
-    def __str__(self):
-        return self.image
-
     class Meta:
         verbose_name = 'Картинка'
         verbose_name_plural = 'Картинки'
@@ -104,7 +101,7 @@ class Like(models.Model):
     slug = models.SlugField()
 
     def __str__(self):
-        return self.user
+        return self.user.username
 
     class Meta:
         verbose_name = 'Нравится'
@@ -180,8 +177,8 @@ class Quantity(models.Model):
         verbose_name='URL'
     )
 
-    def __int__(self):
-        return self.quantity
+    def __str__(self):
+        return str(self.quantity)
 
     class Meta:
         verbose_name = 'Колличество товара'

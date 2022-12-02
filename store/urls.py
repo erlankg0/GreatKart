@@ -1,7 +1,7 @@
 from django.urls import path
 
 """Просмотры (Views) """
-from store.views import HomeView, ShopListView, ShopByCategoryListView, DetailProduct
+from store.views import HomeView, ShopListView, ShopByCategoryListView, DetailProduct, forms
 
 """Маршрутизатор URL"""
 urlpatterns = [
@@ -10,4 +10,5 @@ urlpatterns = [
     path('shop/category/<slug:slug>/', ShopByCategoryListView.as_view(), name='shop_by_category'),
     path('shop/product/<slug:product_slug>/', DetailProduct.as_view(),
          name='detail_product'),
+    path('shop/forms/', forms),
 ]
