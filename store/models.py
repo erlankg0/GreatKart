@@ -2,7 +2,7 @@ from django.db import models
 from django.urls import reverse
 from mptt.models import TreeForeignKey, MPTTModel
 
-from store.utils import directory_path, get_sizes
+from store.utils import directory_image_path, get_sizes
 from accounts.models import Account
 
 """
@@ -49,7 +49,12 @@ class CategoryMPTT(MPTTModel):
     )
 
     def __str__(self):
-        return self.title
+        full_path = [self.title]
+        k = self.parent
+        while k is not None:
+            full_path.append(k.title)
+            k = k.parent
+        return ' -> '.join(full_path[::-1])
 
     def get_absolute_url(self):
         return reverse('shop_by_category', kwargs={'slug': self.slug})
@@ -64,10 +69,17 @@ class CategoryMPTT(MPTTModel):
 
 
 class Image(models.Model):
+    name = models.CharField(
+        verbose_name='Название картинки',
+        max_length=155,
+    )
     image = models.ImageField(
-        upload_to=directory_path,
+        upload_to='images/',
         verbose_name='Картинка'
     )
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         verbose_name = 'Картинка'
@@ -115,24 +127,9 @@ class Size(models.Model):
         max_length=10,
         choices=get_sizes()
     )
-    quantity = models.OneToOneField(
-        'Quantity',
-        related_name='quantity_size',
-        blank=True,
-        null=True,
-        on_delete=models.CASCADE,
-
-    )
-    color = models.OneToOneField(
-        'Color',
-        related_name='color_size',
-        blank=True,
-        null=True,
-        on_delete=models.CASCADE,
-    )
 
     def __str__(self):
-        return f"Size: {self.size} - Quantity: {self.quantity} {self.color}"
+        return self.size
 
     class Meta:
         verbose_name = 'Размер'
@@ -231,15 +228,27 @@ class Product(models.Model):
     category = models.ManyToManyField(
         CategoryMPTT,
         verbose_name='Категория товара',
-        help_text='Удаляется товар если удалится категория'
+        help_text='Удаляется товар если удалится категория',
+        related_name='products'
     )
     images = models.ManyToManyField(
         Image,
         verbose_name='Изображение продукта',
     )
-    size = models.ManyToManyField(
+    size = models.ForeignKey(
         Size,
+        on_delete=models.PROTECT,
         verbose_name='Размер',
+    )
+    color = models.ForeignKey(
+        Color,
+        on_delete=models.PROTECT,
+        verbose_name='Цвет'
+    ),
+    quantity = models.OneToOneField(
+        Quantity,
+        on_delete=models.PROTECT,
+        verbose_name='Колличество'
     )
     price = models.PositiveIntegerField(
         verbose_name='Цена',
@@ -264,6 +273,11 @@ class Product(models.Model):
     stock = models.PositiveIntegerField(
         verbose_name='Колличество в складе'
     )
+    sold = models.PositiveIntegerField(
+        verbose_name='Продано',
+        blank=True,
+        default=0
+    )
     is_available = models.BooleanField(
         default=False,
         verbose_name='В продаже',
@@ -273,11 +287,15 @@ class Product(models.Model):
         IP,
         on_delete=models.CASCADE,
         verbose_name='Просмотры',
+        blank=True,
+        null=True,
     )
     like = models.ForeignKey(
         Like,
         on_delete=models.CASCADE,
         verbose_name='Нравится',
+        blank=True,
+        null=True,
     )
     slug = models.SlugField(
         max_length=200,

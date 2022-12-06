@@ -1,10 +1,9 @@
 from django.shortcuts import render
 from django.views import View
-from django.views.generic import ListView, DetailView, TemplateView
-from django.views.generic.base import TemplateResponseMixin
+from django.views.generic import ListView
 
-from store.models import Product, CategoryMPTT
 from store.forms import ProductForm
+from store.models import Product, CategoryMPTT
 
 
 class HomeView(ListView):
@@ -23,6 +22,10 @@ class ShopListView(HomeView):
         """Переопеределю метод для вывода продуктов которые для продажи"""
         queryset = Product.objects.filter(is_available=True)  # filter()
         return queryset
+
+
+def index(request):
+    return render(request, 'store/forms.html')
 
 
 class ShopByCategoryListView(ShopListView):

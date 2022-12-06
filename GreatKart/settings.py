@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'store.apps.StoreConfig',
     'accounts.apps.AccountsConfig',  # приложения для управления аккаунтами
     'mptt',
+    'django_mptt_admin',
 ]
 
 MIDDLEWARE = [
@@ -57,6 +58,8 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'category.context_processors.get_categories_context',  # Собственый контекст процессор
                 'store.context_processors.get_categories_context_mptt',
+                'store.context_processors.categories_',
+                'store.context_processors.get_sizes',
             ],
         },
     },

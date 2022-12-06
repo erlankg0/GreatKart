@@ -3,6 +3,7 @@ from django.utils.safestring import mark_safe
 
 from store.models import Product, CategoryMPTT, Brand, Size, Color, Quantity, IP, Like, Image
 from store.forms import ProductForm
+from django_mptt_admin.admin import DjangoMpttAdmin
 
 
 @admin.register(Image)
@@ -22,7 +23,7 @@ class SizeAdmin(admin.ModelAdmin):
 
 @admin.register(Color)
 class ColorAdmin(admin.ModelAdmin):
-    pass
+    prepopulated_fields = {"slug": ('color',)}
 
 
 @admin.register(Quantity)
@@ -41,7 +42,7 @@ class LikeAdmin(admin.ModelAdmin):
 
 
 @admin.register(CategoryMPTT)
-class CategoryAdmin(admin.ModelAdmin):
+class CategoryAdmin(DjangoMpttAdmin):
     prepopulated_fields = {'slug': ('title', 'parent',)}
 
 

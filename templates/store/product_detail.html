@@ -39,11 +39,9 @@
                                 <div class="item-option-select">
                                     <h6>Choose Color</h6>
                                     <div class="btn-group btn-group-sm btn-group-toggle" data-toggle="buttons">
-                                        {% for size in product.size.all %}
                                             <label class="btn btn-light">
-                                                <input type="radio" name="radio_color"> {{ size.color.color.upper }}
+                                                <input type="radio" name="radio_color"> {{ product.color.color }}
                                             </label>
-                                        {% endfor %}
                                     </div>
                                 </div>
                             </div> <!-- row.// -->
@@ -52,11 +50,11 @@
 
                                     <h6>Select Size</h6>
                                     <div class="btn-group btn-group-sm btn-group-toggle" data-toggle="buttons">
-                                        {% for size in product.size.all %}
+
                                             <label class="btn btn-light">
-                                                <input type="radio" name="radio_color"> {{ size.size }}
+                                                <input type="radio" name="radio_color"> {{ product.size }}
                                             </label>
-                                        {% endfor %}
+
                                     </div>
                                 </div>
                             </div> <!-- row.// -->

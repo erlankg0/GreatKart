@@ -1,7 +1,18 @@
+import os.path
+
+
 # MEDIA
 # media/path
-def directory_path(instance, filename):
-    return "products/product_{0}/{1}".format(instance, filename)
+def directory_image_path(instance, filename):
+    """
+    Менеджер файлов
+    instance -> Это класс
+    filename имя файла
+    """
+    # логика изменения имя файла
+    filename, ext = os.path.splitext(filename)
+    filename = instance.name.lower() + ext
+    return "products/{0}".format(filename)
 
 
 # generate sizes like ((10, 10,),) tuple

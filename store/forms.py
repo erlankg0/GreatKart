@@ -1,7 +1,7 @@
 from django import forms
 from django.db.models import Count
 
-from store.models import Product, Size
+from store.models import Product, Size, Image
 
 
 class ProductForm(forms.ModelForm):

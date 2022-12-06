@@ -1,7 +1,25 @@
-from store.models import CategoryMPTT
+from store.models import CategoryMPTT, Product, Size
+
+"""Context processors"""
 
 
 def get_categories_context_mptt(request):
-    """Context Processors"""
+    """get categories"""
     categories = CategoryMPTT.objects.all()
     return dict(categories_mptt=categories)
+
+
+def get_sizes(request):
+    sizes = Size.objects.all()
+    return dict(sizes=sizes)
+
+
+def get_products(request):
+    """get products """
+    products = Product.objects.order_by('sold')
+    return dict(products=products)
+
+
+def categories_(request):
+    categories = CategoryMPTT.objects.all()
+    return dict(categories_=categories)
