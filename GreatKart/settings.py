@@ -13,7 +13,7 @@ SECRET_KEY = 'django-insecure-)(l+)@-rk!ih2r5ivi3x033er+=qs25=*)jjgg+84@9l3q4m2=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', '192.168.1.22', 'localhost']
 
 # Application definition
 
@@ -25,11 +25,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'cart.apps.CartConfig',  # приложения корзины
-    'category.apps.CategoryConfig',  # приложения category
-    'store.apps.StoreConfig',
+    'store.apps.StoreConfig',  # приложения продуктов (item)
     'accounts.apps.AccountsConfig',  # приложения для управления аккаунтами
-    'mptt',
-    'django_mptt_admin',
+    'mptt',  # MPTT
+    'django_mptt_admin',  # MPTT admin
 ]
 
 MIDDLEWARE = [
@@ -56,10 +55,10 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'category.context_processors.get_categories_context',  # Собственый контекст процессор
-                'store.context_processors.get_categories_context_mptt',
-                'store.context_processors.categories_',
-                'store.context_processors.get_sizes',
+                'store.context_processors.get_categories_context_mptt',  # контекст процессор (категорий)
+                'store.context_processors.categories_',  # контекст процессор (категорий)
+                'store.context_processors.get_sizes',  # контекст процессор (размеров)
+                'store.context_processors.get_brands'  # контекст процессор (брендов)
             ],
         },
     },
@@ -101,7 +100,7 @@ AUTH_USER_MODEL = 'accounts.Account'
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'UTC'
 

@@ -1,4 +1,4 @@
-from store.models import CategoryMPTT, Product, Size
+from store.models import CategoryMPTT, Product, Size, Brand
 
 """Context processors"""
 
@@ -12,6 +12,11 @@ def get_categories_context_mptt(request):
 def get_sizes(request):
     sizes = Size.objects.all()
     return dict(sizes=sizes)
+
+
+def get_brands(request):
+    brands = Brand.objects.all()
+    return dict(brands=brands)
 
 
 def get_products(request):

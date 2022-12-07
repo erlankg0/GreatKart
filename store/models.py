@@ -115,6 +115,9 @@ class Like(models.Model):
     def __str__(self):
         return self.user.username
 
+    def count(self) -> int:
+        return self.count()
+
     class Meta:
         verbose_name = 'Нравится'
         verbose_name_plural = 'Нравится'
@@ -196,6 +199,9 @@ class Brand(models.Model):
         help_text='Максимум 155 символов, уникальное',
         unique=True,
     )
+
+    def get_absolute_url(self):
+        return reverse('shot_by_brand', kwargs={"slug": self.slug})
 
     def __str__(self):
         return self.name
@@ -320,8 +326,8 @@ class Product(models.Model):
     def get_absolute_url(self):
         return reverse('detail_product', args=[self.slug])
 
-    def liked_count(self):
-        return self.like.count()
+    def liked_count(self) -> int:  # Count total like
+        return len(Like.objects.filter(user__like__product=self))
 
     def save(self, *args, **kwargs):
         if self.discount:

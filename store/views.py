@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import render
 from django.views import View
 from django.views.generic import ListView
@@ -41,11 +42,17 @@ class ShopByCategoryListView(ShopListView):
 
     def get_queryset(self):
         """Переопеределю метод для вывода продуктов по категории которые для продажи"""
-        print(self.kwargs)
         queryset = Product.objects.filter(
             category__slug=self.kwargs['slug'],  # получаем slug из GET
             is_available=True,
         )
+        return queryset
+
+
+class ShopByBrandListView(ShopListView):
+    def get_queryset(self):
+        queryset = Product.objects.filter(
+            Q(brand__slug=self.kwargs['slug']))  # добавлю дополнительные данные
         return queryset
 
 

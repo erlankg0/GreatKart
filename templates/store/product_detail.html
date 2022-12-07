@@ -39,9 +39,9 @@
                                 <div class="item-option-select">
                                     <h6>Choose Color</h6>
                                     <div class="btn-group btn-group-sm btn-group-toggle" data-toggle="buttons">
-                                            <label class="btn btn-light">
-                                                <input type="radio" name="radio_color"> {{ product.color.color }}
-                                            </label>
+                                        <label class="btn btn-light">
+                                            <input type="radio" name="radio_color"> {{ product.liked_count }}
+                                        </label>
                                     </div>
                                 </div>
                             </div> <!-- row.// -->
@@ -51,19 +51,27 @@
                                     <h6>Select Size</h6>
                                     <div class="btn-group btn-group-sm btn-group-toggle" data-toggle="buttons">
 
-                                            <label class="btn btn-light">
-                                                <input type="radio" name="radio_color"> {{ product.size }}
-                                            </label>
+                                        <label class="btn btn-light">
+                                            <input type="radio" name="radio_color"> {{ product.size }}
+                                        </label>
 
                                     </div>
                                 </div>
                             </div> <!-- row.// -->
+                            <div class="row">
+                                <h5>Нравится :{{ product.liked_count }}</h5>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <button class="btn btn-danger">Нравится</button>
+                            </div>
+
                             <hr>
                             {% if product.stock <= 0 %}
                                 <h2 class="text-danger">Нету в наличии</h2>
                             {% else %}
                                 <a href="{% url 'add_cart' product.id %}" class="btn  btn-primary"> <span
-                                        class="text">Add to cart</span> <i class="fas fa-shopping-cart"></i> </a>
+                                        class="text">Добавить в корзину</span> <i class="fas fa-shopping-cart"></i> </a>
                             {% endif %}
 
                         </article> <!-- product-info-aside .// -->
