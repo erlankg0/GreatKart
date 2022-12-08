@@ -77,11 +77,21 @@
                 <div class="col-lg-3 col-sm-6 col-8 order-2 order-lg-3">
                     <div class="d-flex justify-content-end mb-3 mb-lg-0">
                         <div class="widget-header">
-                            <small class="title text-muted">Welcome guest!</small>
-                            <div>
-                                <a href="/admin">Sign in</a> <span class="dark-transp"> | </span>
-                                <a href="./register.html"> Register</a>
-                            </div>
+                            {% if user.is_authenticated %}
+                                <p class="title">Welcome {{ user }}!</p>
+                                <div>
+                                    <a href="{% url 'sign_out' %}">
+                                        Log out <i class="fas fa-sign-out-alt"></i>
+                                    </a>
+                                </div>
+                            {% else %}
+                                <div>
+                                    <small class="title">Добро пожаловать!</small>
+                                    <a href="{% url 'sign_in' %}">Вход <i class="fas fa-sign-in-alt"></i> </a> <span
+                                        class="dark-transp"> | </span>
+                                    <a href="{% url 'sign_up' %}"> Регистрация <i class="fas fa-sign"></i> </a>
+                                </div>
+                            {% endif %}
                         </div>
                         <a href="{% url 'cart' %}" class="widget-header pl-3 ml-3">
                             <div class="icon icon-sm rounded-circle border"><i class="fa fa-shopping-cart"></i></div>
@@ -95,3 +105,4 @@
 
 
 </header>
+{{ message.success }}
