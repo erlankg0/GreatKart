@@ -1,9 +1,12 @@
 from django.db import models
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 from mptt.models import TreeForeignKey, MPTTModel
 
 from store.utils import directory_image_path, get_sizes
 from accounts.models import Account
+# for get color_name (use other API )
+import requests
 
 """
 Модели SQL
@@ -68,7 +71,7 @@ class CategoryMPTT(MPTTModel):
         db_table = 'category_mptt'  # Имя таблицы
 
 
-class Image(models.Model):
+class Images(models.Model):
     name = models.CharField(
         verbose_name='Название картинки',
         max_length=155,
@@ -76,6 +79,12 @@ class Image(models.Model):
     image = models.ImageField(
         upload_to='images/',
         verbose_name='Картинка'
+    )
+    product = models.ForeignKey(
+        'Product',
+        on_delete=models.CASCADE,
+        verbose_name='Картинка для продукта'
+
     )
 
     def __str__(self):
@@ -128,7 +137,7 @@ class Size(models.Model):
     """Размер продукта"""
     size = models.CharField(
         max_length=10,
-        choices=get_sizes()
+        verbose_name='Размер/объем'
     )
 
     def __str__(self):
@@ -142,25 +151,29 @@ class Size(models.Model):
 
 class Color(models.Model):
     """Таблица для хранения цветов товаров"""
-    COLOR = (
-        ('BLACK', 'BLACK'),
-        ('WHITE', 'WHITE'),
-        ('GRAY', 'GRAY'),
-        ('BEIGE', 'BEIGE'),
-        ('RED', 'RED'),
-        ('BLUE', 'BLUE'),
+    name = models.CharField(
+        max_length=100,
+        verbose_name='Название цвета',
+        blank=True,
+        null=True
     )
     color = models.CharField(
-        max_length=10,
+        max_length=50,
         verbose_name='Цвет товара',
-        choices=COLOR,
-    )
-    slug = models.SlugField(
-        verbose_name='URL'
     )
 
+    def save(self, *args, **kwargs):
+        rq = requests.get(f"https://www.thecolorapi.com/id?hex={self.color[1:]}").json()['name']['value']
+        self.name = rq
+        return super(Color, self).save(*args, **kwargs)
+
     def __str__(self):
-        return self.color
+        return mark_safe(f'<span style="color: {self.color};">{self.name}</span>')
+
+    def color_tag(self):
+        if self.color is not None:
+            return mark_safe('<p style="background-color:{}">Цвет</p>'.format(self.color))
+        return '-'
 
     class Meta:
         verbose_name = 'Цвет товар'
@@ -168,22 +181,20 @@ class Color(models.Model):
         db_table = 'color'  # Имя таблицы
 
 
-class Quantity(models.Model):
-    """Таблица для хранения колличество товаров"""
-    quantity = models.PositiveIntegerField(
-        verbose_name='Колличество товара'
-    )
-    slug = models.SlugField(
-        verbose_name='URL'
-    )
-
-    def __str__(self):
-        return str(self.quantity)
-
-    class Meta:
-        verbose_name = 'Колличество товара'
-        verbose_name_plural = 'Колличество товаров'
-        db_table = 'quantity'  # Имя таблицы
+#
+# class Quantity(models.Model):
+#     """Таблица для хранения колличество товаров"""
+#     quantity = models.PositiveIntegerField(
+#         verbose_name='Колличество товара'
+#     )
+#
+#     def __str__(self):
+#         return str(self.quantity)
+#
+#     class Meta:
+#         verbose_name = 'Колличество товара'
+#         verbose_name_plural = 'Колличество товаров'
+#         db_table = 'quantity'  # Имя таблицы
 
 
 class Brand(models.Model):
@@ -233,51 +244,16 @@ class Product(models.Model):
     )
     category = models.ManyToManyField(
         CategoryMPTT,
-        verbose_name='Категория товара',
-        help_text='Удаляется товар если удалится категория',
-        related_name='products'
+        # on_delete=models.PROTECT,  # Категория не удалится пока не будет удалено товар(продукт),
+        verbose_name='Категория товара'
+    )  # many to one relation with Category
+    keywords = models.CharField(
+        verbose_name='Ключевые слова',
+        max_length=255,
     )
-    images = models.ManyToManyField(
-        Image,
-        verbose_name='Изображение продукта',
-    )
-    size = models.ForeignKey(
-        Size,
-        on_delete=models.PROTECT,
-        verbose_name='Размер',
-    )
-    color = models.ForeignKey(
-        Color,
-        on_delete=models.PROTECT,
-        verbose_name='Цвет'
-    ),
-    quantity = models.OneToOneField(
-        Quantity,
-        on_delete=models.PROTECT,
-        verbose_name='Колличество'
-    )
-    price = models.PositiveIntegerField(
-        verbose_name='Цена',
-        help_text='Только позитивные числа'
-    )
-    discount = models.BooleanField(
-        default=False,
-        verbose_name='Скидка'
-    )
-    discount_price = models.PositiveIntegerField(
-        verbose_name='Скидка',
-        help_text='Пишем сумму скидки',
-        blank=True,
-        null=True,
-    )
-    discounted = models.PositiveIntegerField(
-        verbose_name='Старая цена',
-        help_text='Если есть скидка тут будет хранится старая цена',
-        blank=True,
-        null=True,
-    )
-    stock = models.PositiveIntegerField(
-        verbose_name='Колличество в складе'
+    image = models.ImageField(
+        upload_to=directory_image_path,
+        verbose_name='Изображение товара(продукта)'
     )
     sold = models.PositiveIntegerField(
         verbose_name='Продано',
@@ -287,7 +263,7 @@ class Product(models.Model):
     is_available = models.BooleanField(
         default=False,
         verbose_name='В продаже',
-        help_text='В продаже, если в складе не осталось будет убрана с продажи'
+        help_text='В продаже, если в складе не осталось будет убрана с продажи',
     )
     view = models.ForeignKey(
         IP,
@@ -304,23 +280,24 @@ class Product(models.Model):
         null=True,
     )
     slug = models.SlugField(
-        max_length=200,
         unique=True,
-        verbose_name='URL',
-        help_text='Максимальная длина 200 симвлов и должна быть уникальной',
+        verbose_name='URL'
     )
-    created_date = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата и время поставки товара на склад',
-        help_text="Автоматически сохраняет дату и время"
-    )
-    modified_date = models.DateTimeField(
-        auto_now=True,
-        verbose_name='Дата и время изменения',
-        help_text="Автоматически уставливается"
-    )
+    create_at = models.DateTimeField(auto_now_add=True)
+    update_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+        return self.name
+
+    # method to create a fake table field in read only mode
+    def image_tag(self):
+        if self.image.url is not None:
+            return mark_safe('<img src="{}" height="50"/>'.format(self.image.url))
+        else:
+            return ""
+
+    def category_name(self):
+        self.name = Product.category.name
         return self.name
 
     def get_absolute_url(self):
@@ -329,13 +306,82 @@ class Product(models.Model):
     def liked_count(self) -> int:  # Count total like
         return len(Like.objects.filter(user__like__product=self))
 
-    def save(self, *args, **kwargs):
-        if self.discount:
-            self.discounted = self.price + self.discount_price
-        super(Product, self).save(*args, **kwargs)
-
     class Meta:
         ordering = ['-name', ]
         db_table = 'products'  # Имя таблицы
         verbose_name = 'Продукт'
         verbose_name_plural = 'Продукты'
+
+
+class Variants(models.Model):
+    name = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name='Название варианта',
+        help_text='Пример T-Shirt размер S'
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        verbose_name='Связь с продуктом',
+        related_name='variant_product',
+    )
+    image = models.ForeignKey(
+        Images,
+        on_delete=models.CASCADE,
+        verbose_name='Изображение'
+    )
+    price = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        verbose_name='Цена товара без скидок'
+    )
+    discount_price = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=1,
+        verbose_name='Скидочная цена'
+    )
+    color = models.ForeignKey(
+        Color,
+        on_delete=models.CASCADE,
+        verbose_name='Цвет продукта',
+        blank=True,
+        null=True,
+    )
+    size = models.ForeignKey(
+        Size,
+        on_delete=models.CASCADE,
+        verbose_name='Размер продукта',
+        blank=True,
+        null=True,
+    )
+    quantity = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Количество товара'
+    )
+
+    slug = models.SlugField(
+        unique=True,
+        verbose_name='URL варианта'
+    )
+
+    def __str__(self):
+        return self.name
+
+    def image_tag(self):
+        img = Images.objects.get(id=self.image_id)
+        if img.id is not None:
+            return mark_safe(f'<img src="{img.image_.url}" height="50"/>')
+        else:
+            return ''
+
+    def image_(self):
+        img = Images.objects.get(image=self.image)
+        if img is not None:
+            var_image = img.image.url
+        else:
+            var_image = ''
+        return var_image

@@ -224,5 +224,32 @@ class AccountCreateForm(UserCreationForm):
 
 
 # Form Change Password
-class AccountChangePassword(PasswordChangeForm):
-    pass
+class AccountChangePassword(PasswordChangeForm, forms.ModelForm):
+    old_password = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Старый пароль"
+            }
+        )
+    )
+    new_password1 = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Новый пароль"
+            }
+        )
+    )
+    new_password2 = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Пароль"
+            }
+        )
+    )
+
+    class Meta:
+        model = Account
+        fields = ('email', 'old_password', 'new_password1', 'new_password1',)

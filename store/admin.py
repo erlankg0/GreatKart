@@ -1,14 +1,10 @@
+import admin_thumbnails
 from django.contrib import admin
 from django.utils.safestring import mark_safe
-
-from store.models import Product, CategoryMPTT, Brand, Size, Color, Quantity, IP, Like, Image
-from store.forms import ProductForm
 from django_mptt_admin.admin import DjangoMpttAdmin
 
-
-@admin.register(Image)
-class ImageAdmin(admin.ModelAdmin):
-    pass
+from store.forms import ColorForm
+from store.models import Product, CategoryMPTT, Brand, Size, Color, IP, Like, Images, Variants
 
 
 @admin.register(Brand)
@@ -23,12 +19,16 @@ class SizeAdmin(admin.ModelAdmin):
 
 @admin.register(Color)
 class ColorAdmin(admin.ModelAdmin):
-    prepopulated_fields = {"slug": ('color',)}
+    form = ColorForm
 
+    def display_color(self, obj):
+        if obj.color:
+            return mark_safe(
+                f'<p style="background-color: {obj.name}; color: {obj.name};">{obj.name}</p>'
+            )
 
-@admin.register(Quantity)
-class QuantityAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['name', 'display_color', ]
+    readonly_fields = ('name',)
 
 
 @admin.register(IP)
@@ -46,26 +46,42 @@ class CategoryAdmin(DjangoMpttAdmin):
     prepopulated_fields = {'slug': ('title', 'parent',)}
 
 
+class CategoryInline(admin.TabularInline):
+    model = CategoryMPTT
+    extra = 1
+
+
+# admin_thumbnails -----------------------------------------------------------------------------------------------------
+@admin_thumbnails.thumbnail('image')
+class ProductImageInline(admin.TabularInline):
+    model = Images
+    readonly_fields = ('id',)
+    extra = 1
+
+
+class ProductVariantsInline(admin.TabularInline):
+    model = Variants
+    readonly_fields = ('image_tag',)
+    extra = 1
+    show_change_link = True
+
+
+@admin_thumbnails.thumbnail('image')
+@admin.register(Images)
+class ImageAdmin(admin.ModelAdmin):
+    list_display = ['image', 'id', 'name', 'image_thumbnail']
+
+
 # Админ панель модели Product
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    """Панель администрации измененный """
-    form = ProductForm
+    list_display = ['name', 'is_available', 'image_tag']
+    list_filter = ['category']
+    readonly_fields = ('image_tag',)
+    inlines = [ProductImageInline, ProductVariantsInline]
+    prepopulated_fields = {"slug": ('name', 'keywords',)}
 
-    def get_image(self, obj):
-        """
-        obj -> Product
-        проверяем если в Product.images есть изображение
-        тогда через функцию mark_safe выводим в админ панели изоброжения продукта.
-        А если нету тогда просто дефиз
-        """
-        if obj.images:
-            return mark_safe(f'<img src="{obj.images.url}" alt="{obj.name}" width="60">')
-        else:
-            return mark_safe("-")
 
-    get_image.__name__ = 'Изображение'
-    list_display = ('name', 'price', 'discount_price', 'stock', 'modified_date', 'is_available',)
-    list_filter = ('name', 'price', 'discount_price', 'stock', 'modified_date', 'is_available',)
-    prepopulated_fields = {'slug': ('name',)}
-    list_editable = ('price', 'discount_price', 'stock',)
+@admin.register(Variants)
+class VariantsAdmin(admin.ModelAdmin):
+    pass

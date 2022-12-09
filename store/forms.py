@@ -1,7 +1,20 @@
 from django import forms
-from django.db.models import Count
 
-from store.models import Product, Size, Image
+from store.models import Product, Color
+
+
+class ColorForm(forms.ModelForm):
+    class Meta:
+        model = Color
+        fields = ('name', 'color')
+
+        widgets = {
+            'color': forms.TextInput(
+                attrs={
+                    "type": 'color',
+                }
+            )
+        }
 
 
 class ProductForm(forms.ModelForm):

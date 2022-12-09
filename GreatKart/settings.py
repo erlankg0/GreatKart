@@ -24,7 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cart.apps.CartConfig',  # приложения корзины
+    # 'cart.apps.CartConfig',  # приложения корзины
     'store.apps.StoreConfig',  # приложения продуктов (item)
     'accounts.apps.AccountsConfig',  # приложения для управления аккаунтами
     'mptt',  # MPTT

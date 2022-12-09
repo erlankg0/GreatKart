@@ -149,19 +149,18 @@
                             <div class="col-md-4">
                                 <figure class="card card-product-grid">
                                     <div class="img-wrap owl-carousel owl-theme">
-                                        {% for image in product.images.all %}
-                                            <img src="{{ image.image.url }}" alt="{{ product.name }}">
-                                        {% endfor %}
+                                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
                                     </div> <!-- img-wrap.// -->
                                     <figcaption class="info-wrap">
                                         <div class="fix-height">
                                             <a href="{{ product.get_absolute_url }}"
-                                               class="title">{{ product.name }}</a>
+                                               class="title">{{ product.name }}
+                                            </a>
                                             <div class="price-wrap mt-2">
-                                                <span class="price">${{ product.price }}</span>
-                                                {% if product.discount and product.discounted %}
+                                                <span class="price">${{ product.variant_product.first.price }}</span>
+                                                {% if product.variant_product.first.discount_price %}
                                                     <del class="price-old">
-                                                        ${{ product.discounted }}</del>
+                                                        ${{ product.variant_product.first.discount_price }}</del>
                                                 {% endif %}
                                             </div> <!-- price-wrap.// -->
                                         </div>

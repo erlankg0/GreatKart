@@ -35,4 +35,5 @@ class SignUpView(CreateView):
 # Change password, Forgot password
 class ChangePasswordView(PasswordChangeView):
     form_class = AccountChangePassword
+    template_name = 'accounts/forgot.html'
     success_url = reverse_lazy('password_change_done')

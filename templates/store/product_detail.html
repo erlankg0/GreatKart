@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load categories %}
+
 {% block content %}
     <section class="section-content padding-y bg">
         <div class="container">
@@ -11,7 +11,7 @@
                     <aside class="col-md-6">
                         <article class="gallery-wrap ">
                             <div class="owl-carousel owl-theme">
-                                {% for image in product.images.all %}
+                                {% for image in product.images_set.all %}
                                     <a href="#">
                                         <img src="{{ image.image.url }}" alt="">
                                     </a>
@@ -27,37 +27,11 @@
                             <h4 class="section-title">{{ product.name }}</h4>
 
                             <div class="mb-3">
-                                <var class="price h4">${{ product.price }}</var>
+                                <var class="price h4">${{ product.variant_product.first.price }}</var>
                             </div>
 
                             <p>{{ product.description }}</p>
-
-
                             <hr>
-
-                            <div class="row">
-                                <div class="item-option-select">
-                                    <h6>Choose Color</h6>
-                                    <div class="btn-group btn-group-sm btn-group-toggle" data-toggle="buttons">
-                                        <label class="btn btn-light">
-                                            <input type="radio" name="radio_color"> {{ product.liked_count }}
-                                        </label>
-                                    </div>
-                                </div>
-                            </div> <!-- row.// -->
-                            <div class="row">
-                                <div class="item-option-select">
-
-                                    <h6>Select Size</h6>
-                                    <div class="btn-group btn-group-sm btn-group-toggle" data-toggle="buttons">
-
-                                        <label class="btn btn-light">
-                                            <input type="radio" name="radio_color"> {{ product.size }}
-                                        </label>
-
-                                    </div>
-                                </div>
-                            </div> <!-- row.// -->
                             <div class="row">
                                 <h5>Нравится :{{ product.liked_count }}</h5>
                             </div>
@@ -70,7 +44,7 @@
                             {% if product.stock <= 0 %}
                                 <h2 class="text-danger">Нету в наличии</h2>
                             {% else %}
-                                <a href="{% url 'add_cart' product.id %}" class="btn  btn-primary"> <span
+                                <a href="/" class="btn  btn-primary"> <span
                                         class="text">Добавить в корзину</span> <i class="fas fa-shopping-cart"></i> </a>
                             {% endif %}
 
