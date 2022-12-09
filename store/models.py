@@ -168,7 +168,7 @@ class Color(models.Model):
         return super(Color, self).save(*args, **kwargs)
 
     def __str__(self):
-        return mark_safe(f'<span style="color: {self.color};">{self.name}</span>')
+        return self.name
 
     def color_tag(self):
         if self.color is not None:
