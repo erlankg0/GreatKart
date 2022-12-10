@@ -1,10 +1,11 @@
 from django.db.models import Q
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views import View
 from django.views.generic import ListView
 
 from store.forms import ProductForm
-from store.models import Product, CategoryMPTT
+from store.models import Product, CategoryMPTT, Variants, Color
 
 
 class HomeView(ListView):
@@ -73,3 +74,21 @@ class DetailProduct(View):
 
 def forms(request):
     return render(request, 'store/forms.html', {"form": ProductForm()})
+
+
+# AJAX try load product by variants
+
+
+def is_ajax(request):
+    return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+
+
+class GetSizeByColorOrType(View):
+    def get(self, request, product_id, color_id, *args, **kwargs):
+        if is_ajax(request):
+            print('AJAX')
+            product = Product.objects.get(pk=product_id)
+            color = Color.objects.get(pk=color_id)
+            products_variants = Variants.objects.filter(product=product, color=color).values('id', 'name', 'size__size')
+            return JsonResponse({"data": list(products_variants)})
+        return HttpResponse("Error need to AJAX")

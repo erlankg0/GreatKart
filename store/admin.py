@@ -64,6 +64,7 @@ class ProductVariantsInline(admin.TabularInline):
     readonly_fields = ('image_tag',)
     extra = 1
     show_change_link = True
+    prepopulated_fields = {"slug": ('name', 'color', 'size', 'price')}
 
 
 @admin_thumbnails.thumbnail('image')

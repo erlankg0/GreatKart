@@ -3,6 +3,7 @@ from django.urls import path
 """Просмотры (Views) """
 from store.views import HomeView, DetailProduct, forms, index
 from store.views import ShopListView, ShopByCategoryListView, ShopByBrandListView
+from store.views import GetSizeByColorOrType
 
 """Маршрутизатор URL"""
 urlpatterns = [
@@ -14,4 +15,6 @@ urlpatterns = [
          name='detail_product'),
     path('shop/forms/', forms),
     path('shop/mptt', index),
+    # AJAX
+    path('api/<int:product_id>/<int:color_id>/', GetSizeByColorOrType.as_view(), name='api_color_size'),
 ]
