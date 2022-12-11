@@ -1,3 +1,6 @@
+import re
+
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, AbstractUser
 
@@ -82,7 +85,7 @@ class Account(AbstractUser):
         verbose_name='Email',
         max_length=50,
         unique=True
-    )
+    )  # email
     # нужно сделать валлидацию номера телефона
     phone = models.CharField(
         verbose_name='Номер телефона',
@@ -90,14 +93,22 @@ class Account(AbstractUser):
         blank=True,
         null=True,
         max_length=50
-    )
-    is_active = models.BooleanField(default=True)
-    is_admin = models.BooleanField(default=False)
+    )  # номер телефона
+
+    is_active = models.BooleanField(default=True)  # активный пользователь
+    is_admin = models.BooleanField(default=False)  # администратор
 
     objects = CustomUserManager()
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'phone']
+    USERNAME_FIELD = 'email'  # логин по email
+    REQUIRED_FIELDS = ['username', 'phone']  # Email & Password are required by default.
 
     def __str__(self):
-        return self.email
+        return self.email  # возвращает email
+
+    # проверка номера телефона на корректность regex
+    def clean_phone(self):
+        phone = self.cleaned_data['phone']
+        if not re.match(r'^\+?1?\d{9,15}$', phone):
+            raise ValidationError('Номер телефона должен быть в формате +905533687369')
+        return phone

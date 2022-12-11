@@ -11,7 +11,7 @@ def directory_image_path(instance, filename):
     """
     # логика изменения имя файла
     filename, ext = os.path.splitext(filename)
-    filename = instance.name.lower() + ext
+    filename = instance.title.lower() + ext
     return "products/{0}".format(filename)
 
 

@@ -1,4 +1,4 @@
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView
 from django.contrib.auth.views import PasswordChangeView
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
@@ -31,9 +31,9 @@ class SignUpView(CreateView):
     success_url = reverse_lazy('home')
 
 
-# Поменять пароль, Забыл пароль
-# Change password, Forgot password
+# Change password.
 class ChangePasswordView(PasswordChangeView):
+    """Change Password View"""
+    template_name = 'accounts/change_password.html'
     form_class = AccountChangePassword
-    template_name = 'accounts/forgot.html'
-    success_url = reverse_lazy('password_change_done')
+    success_url = reverse_lazy('home')

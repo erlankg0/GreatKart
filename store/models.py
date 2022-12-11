@@ -1,52 +1,26 @@
+import requests
 from django.db import models
 from django.urls import reverse
-from django.utils.safestring import mark_safe
-from mptt.models import TreeForeignKey, MPTTModel
-
-from store.utils import directory_image_path, get_sizes
 from accounts.models import Account
-# for get color_name (use other API )
-import requests
-
-"""
-Модели SQL
-
-Category
-
-Size
-
-Color
-
-Quantity
-
-Images
-
-IP
-
-Like
-
-Brand
-
-Product
-
-"""
+from store.utils import directory_image_path
+from mptt.models import TreeForeignKey, MPTTModel
 
 
 class CategoryMPTT(MPTTModel):
-    """Категория продукта"""
+    """Product category"""
     title = models.CharField(
         max_length=50,
         unique=True,
-        verbose_name='Название категории'
-    )
+        verbose_name='Category name'
+    )  # Category name
     parent = TreeForeignKey(
         'self',
         on_delete=models.PROTECT,
         related_name='children',
         blank=True, null=True,
         db_index=True,
-        verbose_name='Подкатегория'
-    )
+        verbose_name='Subcategory'
+    )  # Category slug
     slug = models.SlugField(
         unique=True
     )
@@ -57,331 +31,347 @@ class CategoryMPTT(MPTTModel):
         while k is not None:
             full_path.append(k.title)
             k = k.parent
-        return ' -> '.join(full_path[::-1])
+        return ' -> '.join(full_path[::-1])  # Return category name
 
-    def get_absolute_url(self):
+    def get_absolute_url(self):  # Return category slug
         return reverse('shop_by_category', kwargs={'slug': self.slug})
 
     class MPTTMeta:
-        order_insertion_by = ['title']
+        order_insertion_by = ['title']  # Order by title
 
-    class Meta:
+    class Meta:  # Meta class
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
-        db_table = 'category_mptt'  # Имя таблицы
+        db_table = 'category_mptt'  # Table name
 
 
-class Images(models.Model):
+class Brand(models.Model):  # Brand
     name = models.CharField(
-        verbose_name='Название картинки',
-        max_length=155,
-    )
-    image = models.ImageField(
-        upload_to='images/',
-        verbose_name='Картинка'
-    )
-    product = models.ForeignKey(
-        'Product',
-        on_delete=models.CASCADE,
-        verbose_name='Картинка для продукта'
+        max_length=100,
+        verbose_name='Brand name',
+        help_text='Max 100 symbols, unique e.g. "Nike"',
+        unique=True,
+    )  # Название бренда
+    slug = models.SlugField(
+        max_length=100,
+        verbose_name='URL',
+        help_text='Max 100 symbols, unique e.g. "nike"',
+        unique=True,
+    )  # URL бренда
 
-    )
+    def get_absolute_url(self):  # Возвращает абсолютный URL бренда
+        return reverse('shot_by_brand', kwargs={"slug": self.slug})
 
-    def __str__(self):
+    def __str__(self):  # Возвращает название бренда
         return self.name
 
     class Meta:
-        verbose_name = 'Картинка'
-        verbose_name_plural = 'Картинки'
-        db_table = 'image'  # Имя таблицы
+        verbose_name = 'Бренд'  # Имя модели
+        verbose_name_plural = 'Бренды'  # Имя модели во множественном числе
+        db_table = 'brand'  # Имя таблицы
+        ordering = ['name']  # Сортировка по названию бренда
 
 
-class IP(models.Model):
-    ip = models.CharField(
-        verbose_name='Тут хранится IP адреса',
-        max_length=50,
+# Модель Ip адреса
+class Ip(models.Model):
+    ip = models.GenericIPAddressField(
+        verbose_name='IP address',
+        help_text='IP address',
         unique=True,
-    )
+    )  # IP адрес
 
-    def __str__(self):
+    def __str__(self):  # Возвращает IP адрес
         return self.ip
 
     class Meta:
-        db_table = 'customer_ip'  # Имя таблицы
-        verbose_name = 'IP'
-        verbose_name_plural = 'IP'
+        verbose_name = 'IP адрес'  # Имя модели
+        verbose_name_plural = 'IP адреса'  # Имя модели во множественном числе
+        db_table = 'ip'  # Имя таблицы
 
 
-class Like(models.Model):
-    user = models.ForeignKey(
-        Account,
+# Модель каринки
+class Image(models.Model):
+    image = models.ImageField(
+        upload_to='images/',
+        verbose_name='Image',
+        help_text='Image',
+    )  # Картинка
+    product = models.ForeignKey(
+        'Product',
         on_delete=models.CASCADE,
-        verbose_name='Нравится'
-    )
+        related_name='images_product',
+        verbose_name='Product',
+        help_text='Image',
+        blank=True,
+        null=True,
 
-    slug = models.SlugField()
-
-    def __str__(self):
-        return self.user.username
-
-    def count(self) -> int:
-        return self.count()
+    )  # Продукт
 
     class Meta:
-        verbose_name = 'Нравится'
-        verbose_name_plural = 'Нравится'
+        verbose_name = 'Картинка'  # Имя модели
+        verbose_name_plural = 'Картинки'  # Имя модели во множественном числе
+        db_table = 'image'  # Имя таблицы
+
+
+# Модель Like
+class Like(models.Model):
+    ip = models.ForeignKey(
+        Ip,
+        on_delete=models.CASCADE,
+        verbose_name='IP address',
+        help_text='IP address',
+    )  # IP адрес
+    product = models.ForeignKey(
+        'Product',
+        on_delete=models.CASCADE,
+        verbose_name='Product',
+        help_text='Product',
+    )  # Продукт
+
+    def __str__(self):  # Возвращает IP адрес и продукт
+        return f'{self.ip} - {self.product}'
+
+    class Meta:
+        verbose_name = 'Нравится'  # Имя модели
+        verbose_name_plural = 'Нравится'  # Имя модели во множественном числе
         db_table = 'like'  # Имя таблицы
 
 
-class Size(models.Model):
-    """Размер продукта"""
-    size = models.CharField(
-        max_length=10,
-        verbose_name='Размер/объем'
-    )
+# Product model  category is many to many field commented on english
+class Product(models.Model):
+    """Product"""
+    category = models.ManyToManyField(
+        CategoryMPTT,
+        verbose_name='Category',
+        related_name='products',
+    )  # Категория
+    brand = models.ForeignKey(
+        Brand,
+        on_delete=models.PROTECT,
+        verbose_name='Brand',
+        related_name='products',
+    )  # Бренд
+    title = models.CharField(
+        max_length=100,
+        verbose_name='Product name',
+        help_text='Max 100 symbols, unique e.g. "Nike Air Max 270"',
+        unique=True,
+    )  # Название продукта
+    description = models.TextField(
+        verbose_name='Description',
+        help_text='Description',
+    )  # Описание
+    image = models.ImageField(
+        upload_to=directory_image_path,
+        verbose_name='Image',
+        help_text='Image',
+    )  # Картинка
+    view = models.ManyToManyField(
+        Ip,  # Ip адрес
+        verbose_name='View',  # Просмотр
+        related_name='view_products',  # related_name='view_products'
+        help_text='view count',  # Просмотры
+        blank=True,
+        null=True,
+    )  # View
+    created = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Created',
+        help_text='Created',
+    )  # Дата создания
+    updated = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Updated',
+        help_text='Updated',
+    )  # Дата обновления
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name='Is active',
+        help_text='Is active',
+    )  # Активный
+    is_new = models.BooleanField(
+        default=False,
+        verbose_name='Is new',
+        help_text='Is new Nike Air Max 270',
+    )  # Новый
+    is_deleted = models.BooleanField(
+        default=False,  # Удален
+        verbose_name='Is deleted',  # Удален
+        help_text='Is deleted',  # Удален
+    )  # Удаленный
+    slug = models.SlugField(
+        max_length=100,  # Максимальная длина 100 символов
+        verbose_name='URL',  # URL
+        help_text='Max 100 symbols, unique e.g. "nike-air-max-270"',  # URL
+        unique=True,
+    )  # URL продукта
 
-    def __str__(self):
-        return self.size
+    def get_absolute_url(self):  # Возвращает абсолютный URL продукта
+        return reverse('product', kwargs={"slug": self.slug})
+
+    def get_new_products(self):  # Возвращает новые продукты
+        return self.objects.filter(is_new=True).order_by('-created')
+
+    def get_view_count(self):  # Возвращает количество просмотров
+        return self.view.count()
+
+    def __str__(self):  # Возвращает название продукта
+        return self.title
 
     class Meta:
-        verbose_name = 'Размер'
-        verbose_name_plural = 'Размеры'
+        verbose_name = 'Продукт'  # Имя модели
+        verbose_name_plural = 'Продукты'  # Имя модели во множественном числе
+        db_table = 'product'
+
+
+# Модель размера с количеством
+class Size(models.Model):
+    size = models.CharField(
+        max_length=255,
+        verbose_name='Size',
+        help_text='Size',
+    )  # Размер
+    quantity = models.IntegerField(
+        verbose_name='Quantity',
+        help_text='Quantity',
+    )  # Количество
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name='Price',
+        help_text='Price',
+    )  # Цена
+    discount = models.PositiveSmallIntegerField(
+        default=0,
+        verbose_name='Discount',
+        help_text='Discount',
+    )  # Скидка
+    use = models.BooleanField(
+        default=True,
+        verbose_name='Used',
+        help_text='Used',
+    )  # Используется
+
+    def get_price_with_discount(self):  # Возвращает цену с учетом скидки
+        return self.price - (self.price * self.discount / 100)
+
+    def __str__(self):  # Возвращает размер и количество товара в нем в виде строки (например 42-1) цена и скидка
+        return f'{self.size} - {self.quantity} - {self.price} - {self.discount}'
+
+    class Meta:
+        verbose_name = 'Размер'  # Имя модели
+        verbose_name_plural = 'Размеры'  # Имя модели во множественном числе
         db_table = 'size'  # Имя таблицы
 
 
+# Модель цвета
 class Color(models.Model):
-    """Таблица для хранения цветов товаров"""
-    name = models.CharField(
-        max_length=100,
-        verbose_name='Название цвета',
-        blank=True,
-        null=True
-    )
     color = models.CharField(
-        max_length=50,
-        verbose_name='Цвет товара',
-    )
+        max_length=255,
+        verbose_name='Color',
+        help_text='Max 255 symbols, unique e.g. "Black"',
+    )  # Цвет
+
+    def __str__(self):  # Возвращает цвет
+        return self.color
 
     def save(self, *args, **kwargs):
-        rq = requests.get(f"https://www.thecolorapi.com/id?hex={self.color[1:]}").json()['name']['value']
-        self.name = rq
-        return super(Color, self).save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
-
-    def color_tag(self):
-        if self.color is not None:
-            return mark_safe('<p style="background-color:{}">Цвет</p>'.format(self.color))
-        return '-'
+        # API hex code to color name https://www.thecolorapi.com/docs
+        # API
+        url = f'https://www.thecolorapi.com/id?hex={self.color[1:]}'  # Получаем цвет по hex коду из базы данных (без #)
+        # Получаем ответ от API
+        response = requests.get(url)
+        # Получаем JSON ответ от API
+        json_response = response.json()
+        # Получаем название цвета
+        color_name = json_response['name']['value']
+        # Перезаписываем цвет
+        self.color = color_name
+        super().save(*args, **kwargs)
 
     class Meta:
-        verbose_name = 'Цвет товар'
-        verbose_name_plural = 'Цвета товаров'
+        verbose_name = 'Цвет'  # Имя модели
+        verbose_name_plural = 'Цвета'  # Имя модели во множественном числе
         db_table = 'color'  # Имя таблицы
 
 
-#
-# class Quantity(models.Model):
-#     """Таблица для хранения колличество товаров"""
-#     quantity = models.PositiveIntegerField(
-#         verbose_name='Колличество товара'
-#     )
-#
-#     def __str__(self):
-#         return str(self.quantity)
-#
-#     class Meta:
-#         verbose_name = 'Колличество товара'
-#         verbose_name_plural = 'Колличество товаров'
-#         db_table = 'quantity'  # Имя таблицы
-
-
-class Brand(models.Model):
-    name = models.CharField(
-        max_length=155,
-        verbose_name='Названия бренда',
-        help_text='Максимум 155 символов, уникальное',
-        unique=True,
-    )
-    slug = models.SlugField(
-        max_length=155,
-        verbose_name='URL',
-        help_text='Максимум 155 символов, уникальное',
-        unique=True,
-    )
-
-    def get_absolute_url(self):
-        return reverse('shot_by_brand', kwargs={"slug": self.slug})
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = 'Бренд'
-        verbose_name_plural = 'Бренды'
-        db_table = 'brand'  # Имя таблицы
-
-
-class Product(models.Model):
-    """SQL модель товара(продукта)"""
-    name = models.CharField(
-        max_length=200,
-        unique=True,
-        verbose_name='Название продукта',
-        help_text='Максимальная длина 200 симвлов и должна быть уникальной'
-    )
-    description = models.TextField(
-        max_length=450,
-        verbose_name='Описание товара',
-        help_text='Максимальная длина 450 символов может быть пустая',
-    )
-    brand = models.OneToOneField(
-        Brand,
-        on_delete=models.SET_NULL,
-        blank=True,
-        null=True,
-    )
-    category = models.ManyToManyField(
-        CategoryMPTT,
-        # on_delete=models.PROTECT,  # Категория не удалится пока не будет удалено товар(продукт),
-        verbose_name='Категория товара'
-    )  # many to one relation with Category
-    keywords = models.CharField(
-        verbose_name='Ключевые слова',
-        max_length=255,
-    )
-    image = models.ImageField(
-        upload_to=directory_image_path,
-        verbose_name='Изображение товара(продукта)'
-    )
-    sold = models.PositiveIntegerField(
-        verbose_name='Продано',
-        blank=True,
-        default=0
-    )
-    is_available = models.BooleanField(
-        default=False,
-        verbose_name='В продаже',
-        help_text='В продаже, если в складе не осталось будет убрана с продажи',
-    )
-    view = models.ForeignKey(
-        IP,
-        on_delete=models.CASCADE,
-        verbose_name='Просмотры',
-        blank=True,
-        null=True,
-    )
-    like = models.ForeignKey(
-        Like,
-        on_delete=models.CASCADE,
-        verbose_name='Нравится',
-        blank=True,
-        null=True,
-    )
-    slug = models.SlugField(
-        unique=True,
-        verbose_name='URL'
-    )
-    create_at = models.DateTimeField(auto_now_add=True)
-    update_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.name
-
-    # method to create a fake table field in read only mode
-    def image_tag(self):
-        if self.image.url is not None:
-            return mark_safe('<img src="{}" height="50"/>'.format(self.image.url))
-        else:
-            return ""
-
-    def category_name(self):
-        self.name = Product.category.name
-        return self.name
-
-    def get_absolute_url(self):
-        return reverse('detail_product', args=[self.slug])
-
-    def liked_count(self) -> int:  # Count total like
-        return len(Like.objects.filter(user__like__product=self))
-
-    class Meta:
-        ordering = ['-name', ]
-        db_table = 'products'  # Имя таблицы
-        verbose_name = 'Продукт'
-        verbose_name_plural = 'Продукты'
-
-
-class Variants(models.Model):
-    name = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        verbose_name='Название варианта',
-        help_text='Пример T-Shirt размер S'
-    )
+# Модель варианта продукта (товара) цвет, много размеров с количеством, цена и цена со скидкой в процентах, изображение
+class ProductVariant(models.Model):
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
-        verbose_name='Связь с продуктом',
-        related_name='variant_product',
-    )
-    image = models.ForeignKey(
-        Images,
-        on_delete=models.CASCADE,
-        verbose_name='Изображение'
-    )
-    price = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-        default=0,
-        verbose_name='Цена товара без скидок'
-    )
-    discount_price = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-        default=1,
-        verbose_name='Скидочная цена'
-    )
+        verbose_name='Product',
+        help_text='Product',
+        related_name='variants',
+    )  # Продукт
+    name = models.CharField(
+        max_length=255,
+        verbose_name='Name',
+        help_text='Nike Air Max 270 Red or Nike Air Max 270 Black',
+    )  # Название
     color = models.ForeignKey(
         Color,
         on_delete=models.CASCADE,
-        verbose_name='Цвет продукта',
-        blank=True,
-        null=True,
-    )
-    size = models.ForeignKey(
+        verbose_name='Color',
+        help_text='Color',
+        related_name='variants',
+    )  # Цвет
+    size = models.ManyToManyField(
         Size,
+        verbose_name='Size',
+        help_text='Size',
+        related_name='variants',
+    )  # Размер
+    image = models.ImageField(
+        upload_to='products/product_variant/',
+        verbose_name='Image',
+        help_text='Image',
+    )  # Изображение
+
+    def __str__(self):  # Возвращает цвет и размер
+        # return f'{self.color} - {self.size}'
+        return f'{self.color}  - {self.product}'  # Возвращает цвет, размер и продукт
+
+    class Meta:
+        verbose_name = 'Вариация продукта'  # Имя модели
+        verbose_name_plural = 'Вариации продуктов'  # Имя модели во множественном числе
+        db_table = 'product_variant'  # Имя таблицы
+
+
+# Модель отзыва о продукте (товаре) с учетом пользователя
+class Review(models.Model):
+    user = models.ForeignKey(
+        Account,
         on_delete=models.CASCADE,
-        verbose_name='Размер продукта',
-        blank=True,
-        null=True,
-    )
-    quantity = models.PositiveIntegerField(
-        default=0,
-        verbose_name='Количество товара'
-    )
+        verbose_name='User',
+        help_text='User',
+    )  # Пользователь
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        verbose_name='Product',
+        help_text='Product',
+    )  # Продукт
+    text = models.TextField(
+        verbose_name='Text',
+        help_text='Text',
+    )  # Текст
+    created = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Created',
+        help_text='Created',
+    )  # Дата создания
+    updated = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Updated',
+        help_text='Updated',
+    )  # Дата обновления
 
-    slug = models.SlugField(
-        unique=True,
-        verbose_name='URL варианта'
-    )
+    def __str__(self):  # Возвращает текст отзыва
+        return self.text
 
-    def __str__(self):
-        return self.name
-
-    def image_tag(self):
-        img = Images.objects.get(id=self.image_id)
-        if img.id is not None:
-            return mark_safe(f'<img src="{img.image_.url}" height="50"/>')
-        else:
-            return ''
-
-    def image_(self):
-        img = Images.objects.get(image=self.image)
-        if img is not None:
-            var_image = img.image.url
-        else:
-            var_image = ''
-        return var_image
+    class Meta:
+        verbose_name = 'Отзыв'  # Имя модели
+        verbose_name_plural = 'Отзывы'  # Имя модели во множественном числе
+        db_table = 'review'  # Имя таблицы
+        ordering = ['-created']  # Сортировка по дате создания

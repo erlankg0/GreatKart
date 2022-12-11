@@ -1,23 +1,30 @@
 from django import forms
-
-from store.models import Product, Color
+from store.models import Product, ProductVariant, CategoryMPTT, Brand, Size, Color
+from django.db.models import Q
 
 
 class ColorForm(forms.ModelForm):
     class Meta:
         model = Color
-        fields = ('name', 'color')
+        fields = ['color']
 
         widgets = {
             'color': forms.TextInput(
                 attrs={
-                    "type": 'color',
+                    'class': 'form-control',
+                    'placeholder': 'Введите цвет',
+                    'type': 'color',
                 }
             )
         }
 
 
-class ProductForm(forms.ModelForm):
+# ProductVariantForm - переопределяем форму __init__ для добавления измения size use FALSE
+class ProductVariantForm(forms.ModelForm):
     class Meta:
-        model = Product
-        fields = '__all__'
+        model = ProductVariant
+        fields = ['product', 'size', 'color', 'image']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['size'].queryset = Size.objects.filter(Q(use=False), Q(price__lt=0))
