@@ -28,14 +28,17 @@
                     <div class="col-md-3">
                         <div class="card card-product-grid">
                             <div class="img-wrap owl-carousel owl-theme">
+                                {% for variant_image in product.images_product.all %}
                                     <a href="{{ product.get_absolute_url }}">
-                                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                                        <img src="{{ variant_image.image.url }}" alt="{{ product.title }}">
                                     </a>
+                                {% endfor %}
                             </div> <!-- img-wrap.// -->
                             <figcaption class="info-wrap">
-                                <a href="{{ product.brand.get_absolute_url }}">{{ product.brand }}</a>
-                                <a href="{{ product.get_absolute_url }}" class="title">{{ product.name }}</a>
-                                <div class="price mt-1">${{ product.variant_product.first.price }}</div> <!-- price-wrap.// -->
+                                <a href="{{ product.brand.get_absolute_url }}">{{ product.brand.name }}</a>
+                                <a href="{{ product.get_absolute_url }}" class="title">{{ product.title }}</a>
+                                <div class="price mt-1">${{ product.price }}</div>
+                                <!-- price-wrap.// -->
                             </figcaption>
                         </div>
                     </div> <!-- col.// -->

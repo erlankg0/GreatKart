@@ -10,7 +10,7 @@
                     <aside class="col-md-6">
                         <article class="gallery-wrap ">
                             <div class="owl-carousel owl-theme">
-                                {% for image in product.images_set.all %}
+                                {% for image in product.images_product.all %}
                                     <a href="#">
                                         <img src="{{ image.image.url }}" alt="">
                                     </a>
@@ -27,47 +27,49 @@
                             <h4 class="section-title">{{ product.name }}</h4>
 
                             <div class="mb-3">
-                                <var class="price h4" id="price">$</var>
+                                <var class="price h4" id="price">Цена: ${{ product.price }}</var>
                             </div>
 
-                            <p>{{ product.description }}</p>
-                            <hr>
-                            <div class="row">
-                                <div class="item-option-select">
-                                    <h6>Выбор цвета</h6>
-                                    <select name="color" id="select-color" class="form-control">
-                                        <option class="form-control">Выбор цвета</option>
-                                        {% for product_color in product.variant_product.all %}
-                                            <option class="form-control"
-                                                    value="{{ product_color.color.id }}">{{ product_color.color }}</option>
-                                        {% endfor %}
-                                    </select>
+                            <dl>
+                                <dt>Описание</dt>
+                                <dd><p>{{ product.description }}</p></dd>
+                                <hr>
+                                <div class="row">
+                                    <div class="item-option-select">
+                                        <h6>Выбор цвета</h6>
+                                        <select name="color" id="select-color" class="form-control">
+                                            <option class="form-control">Выбор цвета</option>
+                                            {% for product_color in product.variant_product.all %}
+                                                <option class="form-control"
+                                                        value="{{ product_color.color.id }}">{{ product_color.color }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div> <!-- row.// -->
+                                <div class="row">
+                                    <div class="item-option-select">
+                                        <h6>Выбор размера</h6>
+                                        <select name="size" id='size' class="form-control">
+                                            <option class="form-control">Выбор размера</option>
+                                        </select>
+                                    </div>
+                                </div> <!-- row.// -->
+                                <div class="row">
+                                    <h5>Нравится :{{ product.like_set.count }}</h5>
                                 </div>
-                            </div> <!-- row.// -->
-                            <div class="row">
-                                <div class="item-option-select">
-                                    <h6>Выбор размера</h6>
-                                    <select name="size" id='size' class="form-control">
-                                        <option class="form-control">Выбор размера</option>
-                                    </select>
+                                <hr>
+                                <div class="row">
+                                    <button class="btn btn-danger">Нравится</button>
                                 </div>
-                            </div> <!-- row.// -->
-                            <div class="row">
-                                <h5>Нравится :{{ product.liked_count }}</h5>
-                            </div>
-                            <hr>
-                            <div class="row">
-                                <button class="btn btn-danger">Нравится</button>
-                            </div>
 
-                            <hr>
-                            {% if product.stock <= 0 %}
-                                <h2 class="text-danger">Нету в наличии</h2>
-                            {% else %}
-                                <a href="/" class="btn  btn-primary"> <span
-                                        class="text">Добавить в корзину</span> <i class="fas fa-shopping-cart"></i>
-                                </a>
-                            {% endif %}
+                                <hr>
+                                {% if product.stock <= 0 %}
+                                    <h2 class="text-danger">Нету в наличии</h2>
+                                {% else %}
+                                    <a href="/" class="btn  btn-primary"> <span
+                                            class="text">Добавить в корзину</span> <i class="fas fa-shopping-cart"></i>
+                                    </a>
+                                {% endif %}
 
                         </article> <!-- product-info-aside .// -->
 

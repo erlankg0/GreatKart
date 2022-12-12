@@ -161,6 +161,13 @@ class Product(models.Model):
         verbose_name='Description',
         help_text='Description',
     )  # Описание
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name='Regular price',
+        help_text='Regular price Nike Air Max 270 100$',
+        default=0,
+    )  # Цена
     image = models.ImageField(
         upload_to=directory_image_path,
         verbose_name='Image',
@@ -207,7 +214,7 @@ class Product(models.Model):
     )  # URL продукта
 
     def get_absolute_url(self):  # Возвращает абсолютный URL продукта
-        return reverse('product', kwargs={"slug": self.slug})
+        return reverse('detail_product', args=[self.slug])
 
     def get_new_products(self):  # Возвращает новые продукты
         return self.objects.filter(is_new=True).order_by('-created')
@@ -256,7 +263,7 @@ class Size(models.Model):
         return self.price - (self.price * self.discount / 100)
 
     def __str__(self):  # Возвращает размер и количество товара в нем в виде строки (например 42-1) цена и скидка
-        return f'{self.size} - {self.quantity} - {self.price} - {self.discount}'
+        return f'Размер: {self.size} - Кол-во: {self.quantity} - Цена: {self.price} - Скидака(%): {self.discount}'
 
     class Meta:
         verbose_name = 'Размер'  # Имя модели

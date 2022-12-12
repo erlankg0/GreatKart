@@ -1,7 +1,7 @@
 from django.urls import path
 
 """Просмотры (Views) """
-from store.views import HomeView, DetailProduct, forms, index
+from store.views import HomeView, DetailProduct, index
 from store.views import ShopListView, ShopByCategoryListView, ShopByBrandListView
 
 """Маршрутизатор URL"""
@@ -12,7 +12,6 @@ urlpatterns = [
     path('shop/brand/<slug:slug>/', ShopByBrandListView.as_view(), name='shot_by_brand'),
     path('shop/product/<slug:product_slug>/', DetailProduct.as_view(),
          name='detail_product'),
-    path('shop/forms/', forms),
     path('shop/mptt', index),
     # AJAX
 ]

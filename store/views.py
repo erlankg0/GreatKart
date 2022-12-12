@@ -20,7 +20,8 @@ class ShopListView(HomeView):
 
     def get_queryset(self):
         """Переопеределю метод для вывода продуктов которые для продажи"""
-        queryset = Product.objects.filter(is_available=True)  # filter()
+        queryset = Product.objects.filter(is_active=True).order_by(
+            '-is_new')  # is_active=True - продукты для продажи is_new=True - новые продукты
         return queryset
 
 
@@ -39,12 +40,11 @@ class ShopByCategoryListView(ShopListView):
             slug=self.kwargs['slug'])  # добавлю дополнительные данные
         return context
 
-    def get_queryset(self):
+    def get_queryset(self):  # переопределяю метод для вывода продуктов по категориям и для продажи
         """Переопеределю метод для вывода продуктов по категории которые для продажи"""
         queryset = Product.objects.filter(
-            category__slug=self.kwargs['slug'],  # получаем slug из GET
-            is_available=True,
-        )
+            Q(category__slug=self.kwargs['slug']) | Q(category__parent__slug=self.kwargs['slug']),
+            is_active=True).order_by('-is_new')  # is_active=True - продукты для продажи is_new=True - новые продукты
         return queryset
 
 
@@ -70,15 +70,17 @@ class DetailProduct(View):
         return render(request, 'store/product_detail.html', context={'product': product})
 
 
-def forms(request):
-    return render(request, 'store/forms.html', {"form": ProductForm()})
+# AJAX запрос для загрузки все варианты цвета и размера
+def get_product(request, product_slug):
+    if is_ajax(request):
+        try:
+            product = Product.objects.get(slug=product_slug)
+        except ConnectionError as Error:
+            raise ConnectionError("Link not Fount")
+        return render(request, 'store/product_detail.html', context={'product': product})
+    else:
+        raise ConnectionError("Link not Fount")
 
-
-# AJAX try load product by variants
-
-
+# is_ajax(request) - проверка на AJAX запрос
 def is_ajax(request):
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
-
-
-

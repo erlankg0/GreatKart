@@ -149,21 +149,23 @@
                             <div class="col-md-4">
                                 <figure class="card card-product-grid">
                                     <div class="img-wrap owl-carousel owl-theme">
-                                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                                        {% for image in product.images_product.all %}
+                                            <img src="{{ image.image.url }}" alt="{{ product.title }}">
+                                        {% endfor %}
                                     </div> <!-- img-wrap.// -->
                                     <figcaption class="info-wrap">
                                         <div class="fix-height">
+                                             <a class="sub-title">
+                                                {{ product.brand }}
+                                            </a>
                                             <a href="{{ product.get_absolute_url }}"
-                                               class="title">{{ product.name }}
+                                               class="title">{{ product.title }}
                                             </a>
                                             <div class="price-wrap mt-2">
-                                                <span class="price">${{ product.variant_product.first.price }}</span>
-                                                {% if product.variant_product.first.discount_price %}
-                                                    <del class="price-old">
-                                                        ${{ product.variant_product.first.discount_price }}</del>
-                                                {% endif %}
+                                                <span class="price">${{ product.price }}</span>
                                             </div> <!-- price-wrap.// -->
                                         </div>
+                                        <a href="#" class="btn btn-block btn-primary">Купить</a>
                                         <a href="#" class="btn btn-block btn-success">Added to cart </a>
                                     </figcaption>
                                 </figure>
