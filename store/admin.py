@@ -1,19 +1,44 @@
 from django.contrib import admin
-from django.utils.safestring import mark_safe
 
-from store.models import Product, CategoryMPTT, Brand, Size, Color, Quantity, IP, Like, Image
-from store.forms import ProductForm
-from django_mptt_admin.admin import DjangoMpttAdmin
+from store.forms import ProductVariantForm, ColorForm
+from store.models import CategoryMPTT, Brand, Product, ProductVariant, Ip, Size, Color, Like, Image, Review
 
 
-@admin.register(Image)
-class ImageAdmin(admin.ModelAdmin):
-    pass
+@admin.register(CategoryMPTT)
+class CategoryMPTTAdmin(admin.ModelAdmin):
+    prepopulated_fields = {'slug': ('title',)}
 
 
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
-    prepopulated_fields = {"slug": ('name',)}
+    prepopulated_fields = {'slug': ('name',)}
+
+
+class ProductVariantInline(admin.StackedInline):
+    form = ProductVariantForm
+    model = ProductVariant
+    extra = 1
+
+
+class ImageInline(admin.TabularInline):
+    model = Image
+    extra = 1
+
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    prepopulated_fields = {'slug': ('title',)}
+    inlines = [ImageInline, ProductVariantInline]
+
+
+@admin.register(ProductVariant)
+class ProductVariantAdmin(admin.ModelAdmin):
+    form = ProductVariantForm
+
+
+@admin.register(Ip)
+class IpAdmin(admin.ModelAdmin):
+    pass
 
 
 @admin.register(Size)
@@ -23,49 +48,19 @@ class SizeAdmin(admin.ModelAdmin):
 
 @admin.register(Color)
 class ColorAdmin(admin.ModelAdmin):
-    prepopulated_fields = {"slug": ('color',)}
-
-
-@admin.register(Quantity)
-class QuantityAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(IP)
-class IPAdmin(admin.ModelAdmin):
-    pass
+    form = ColorForm
 
 
 @admin.register(Like)
 class LikeAdmin(admin.ModelAdmin):
-    prepopulated_fields = {"slug": ('user',)}
+    pass
 
 
-@admin.register(CategoryMPTT)
-class CategoryAdmin(DjangoMpttAdmin):
-    prepopulated_fields = {'slug': ('title', 'parent',)}
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    pass
 
 
-# Админ панель модели Product
-@admin.register(Product)
-class ProductAdmin(admin.ModelAdmin):
-    """Панель администрации измененный """
-    form = ProductForm
-
-    def get_image(self, obj):
-        """
-        obj -> Product
-        проверяем если в Product.images есть изображение
-        тогда через функцию mark_safe выводим в админ панели изоброжения продукта.
-        А если нету тогда просто дефиз
-        """
-        if obj.images:
-            return mark_safe(f'<img src="{obj.images.url}" alt="{obj.name}" width="60">')
-        else:
-            return mark_safe("-")
-
-    get_image.__name__ = 'Изображение'
-    list_display = ('name', 'price', 'discount_price', 'stock', 'modified_date', 'is_available',)
-    list_filter = ('name', 'price', 'discount_price', 'stock', 'modified_date', 'is_available',)
-    prepopulated_fields = {'slug': ('name',)}
-    list_editable = ('price', 'discount_price', 'stock',)
+@admin.register(Image)
+class ImageAdmin(admin.ModelAdmin):
+    pass

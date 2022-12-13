@@ -1,17 +1,16 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load categories %}
+
 {% block content %}
     <section class="section-content padding-y bg">
         <div class="container">
-
             <!-- ============================ COMPONENT 1 ================================= -->
             <div class="card">
                 <div class="row no-gutters">
                     <aside class="col-md-6">
                         <article class="gallery-wrap ">
                             <div class="owl-carousel owl-theme">
-                                {% for image in product.images.all %}
+                                {% for image in product.images_product.all %}
                                     <a href="#">
                                         <img src="{{ image.image.url }}" alt="">
                                     </a>
@@ -20,62 +19,73 @@
 
                         </article> <!-- gallery-wrap .end// -->
                     </aside>
-                    <main class="col-md-6 border-left">
-                        <article class="content-body">
-                            <h3 class="title">Бренд: {{ product.brand.name }}</h3>
+                    <div class="col-md-6 border-left">
+                        <form id="product" autocomplete="off">
+                            <article class="content-body">
+                                <h3 class="title">Бренд: {{ product.brand.name }}</h3>
 
-                            <h4 class="section-title">{{ product.name }}</h4>
+                                <h4 class="section-title">{{ product.name }}</h4>
 
-                            <div class="mb-3">
-                                <var class="price h4">${{ product.price }}</var>
-                            </div>
-
-                            <p>{{ product.description }}</p>
-
-
-                            <hr>
-
-                            <div class="row">
-                                <div class="item-option-select">
-                                    <h6>Choose Color</h6>
-                                    <div class="btn-group btn-group-sm btn-group-toggle" data-toggle="buttons">
-                                        <label class="btn btn-light">
-                                            <input type="radio" name="radio_color"> {{ product.liked_count }}
-                                        </label>
-                                    </div>
+                                <div class="mb-3">
+                                    <span class="price h4" id="price">Цена: ${{ product.price }}</span>
                                 </div>
-                            </div> <!-- row.// -->
-                            <div class="row">
+
+                                <dl>
+                                    <dt>Описание</dt>
+                                    <dd><p>{{ product.description }}</p></dd>
+                                </dl>
+                                <hr>
+
                                 <div class="item-option-select">
-
-                                    <h6>Select Size</h6>
-                                    <div class="btn-group btn-group-sm btn-group-toggle" data-toggle="buttons">
-
-                                        <label class="btn btn-light">
-                                            <input type="radio" name="radio_color"> {{ product.size }}
-                                        </label>
-
-                                    </div>
+                                    <h6>Выбор цвета</h6>
+                                    <select name="color" id="select-color" class="form-control">
+                                        <option class="form-control">Выбор цвета</option>
+                                        {% for variant in product.product_variants.all %}
+                                            <option class="form-control"
+                                                    value="{{ variant.id }}">{{ variant.color }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
-                            </div> <!-- row.// -->
-                            <div class="row">
-                                <h5>Нравится :{{ product.liked_count }}</h5>
-                            </div>
-                            <hr>
-                            <div class="row">
-                                <button class="btn btn-danger">Нравится</button>
-                            </div>
 
-                            <hr>
-                            {% if product.stock <= 0 %}
-                                <h2 class="text-danger">Нету в наличии</h2>
-                            {% else %}
-                                <a href="{% url 'add_cart' product.id %}" class="btn  btn-primary"> <span
-                                        class="text">Добавить в корзину</span> <i class="fas fa-shopping-cart"></i> </a>
-                            {% endif %}
 
-                        </article> <!-- product-info-aside .// -->
-                    </main> <!-- col.// -->
+                                <div class="item-option-select">
+                                    <h6>Выбор размера</h6>
+                                    <select name="size" id='size' class="form-control">
+                                        <option class="form-control">Выбор размера</option>
+                                    </select>
+                                </div>
+
+                                <hr>
+                                <div class="mb-3">
+                                    <var class="h4" id="quantity"></var>
+                                </div>
+                                {% if user.is_authenticated %}
+                                    {% if product.stock <= 0 %}
+                                        <h2 class="text-danger">Нету в наличии</h2>
+                                    {% else %}
+                                        <a href="/" class="btn  btn-primary"> <span
+                                                class="text">Добавить в корзину</span> <i
+                                                class="fas fa-shopping-cart"></i>
+                                        </a>
+                                    {% endif %}
+                                {% else %}
+                                    <a href="{% url 'sign_in' %}" class="btn  btn-primary btn-info"> <span
+                                            class="text">Для покупки нужна авторизация.</span>
+                                    </a>
+                                {% endif %}
+                            </article> <!-- product-info-aside .// -->
+                        </form>
+                        {% if user.is_authenticated %}
+                            <article class="content-body">
+                                <div class="col-md-6">
+                                    <button class="btn btn-danger" id="like"
+                                            data-like="{% url 'add_like' product.id ip %}">Нравится
+                                    </button>
+                                </div>
+                            </article>
+                        {% endif %}
+                    </div><!-- col.// -->
                 </div> <!-- row.// -->
             </div> <!-- card.// -->
             <!-- ============================ COMPONENT 1 END .// ================================= -->
@@ -116,5 +126,13 @@
         </div> <!-- container .//  -->
     </section>
     <!-- ========================= SECTION CONTENT END// ========================= -->
+    <script>
+        $("#like").click(function () {
+            const url = $("#like").attr("data-like");  // get the url of the `load_provinces` view
+            $.ajax({                       // initialize an AJAX request
+                url: url,
+            });
+        });
 
+    </script>
 {% endblock %}
