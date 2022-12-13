@@ -81,7 +81,10 @@
                                 <p class="title">Welcome {{ user }}!</p>
                                 <div>
                                     <a href="{% url 'sign_out' %}">
-                                        Log out <i class="fas fa-sign-out-alt"></i>
+                                        Выход <i class="fas fa-sign-out-alt"></i>
+                                    </a>
+                                    <a href="{% url 'password_change' %}">
+                                        Пароль <i class="fas fa-key"></i>
                                     </a>
                                 </div>
                             {% else %}
