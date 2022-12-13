@@ -3,6 +3,7 @@ from django.urls import path
 """Просмотры (Views) """
 from store.views import HomeView, DetailProduct, index
 from store.views import ShopListView, ShopByCategoryListView, ShopByBrandListView
+from store.views import get_size, get_price
 
 """Маршрутизатор URL"""
 urlpatterns = [
@@ -14,4 +15,6 @@ urlpatterns = [
          name='detail_product'),
     path('shop/mptt', index),
     # AJAX
+    path('shop/variant/<int:variant_id>/', get_size, name='get_variants'),
+    path('shop/size/<int:size_id>/price/quantity/', get_price, name='get_price'),
 ]

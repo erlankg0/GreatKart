@@ -11,10 +11,10 @@ class CategoryMPTTAdmin(admin.ModelAdmin):
 
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
-    pass
+    prepopulated_fields = {'slug': ('name',)}
 
 
-class ProductVariantInline(admin.TabularInline):
+class ProductVariantInline(admin.StackedInline):
     form = ProductVariantForm
     model = ProductVariant
     extra = 1

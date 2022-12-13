@@ -19,26 +19,21 @@ class ColorForm(forms.ModelForm):
         }
 
 
-# ProductVariantForm - переопределяем форму __init__ для добавления измения size use FALSE
 class ProductVariantForm(forms.ModelForm):
     class Meta:
         model = ProductVariant
         fields = ['product', 'size', 'color', 'image']
 
-    # переопределяем форму __init__ query_set для добавления измения size use FALSE
-    def __init__(self, *args, **kwargs):
-        super(ProductVariantForm, self).__init__(*args, **kwargs)
-        self.fields['size'].queryset = Size.objects.filter(use=False)
-
     def clean(self):
-        cleaned_data = super(ProductVariantForm, self).clean()
+        cleaned_data = super().clean()
         product = cleaned_data.get('product')
         size = cleaned_data.get('size')
         color = cleaned_data.get('color')
-        image = cleaned_data.get('image')
-        if not product or not size or not color or not image:
-            raise forms.ValidationError('Заполните все поля')
-        return cleaned_data
+        if ProductVariant.objects.filter(size__in=size):  # если есть такой размер
+            raise forms.ValidationError('Такой вариант уже существует в добавьте уникальный размер')
+        if ProductVariant.objects.filter(product=product, color=color):
+            raise forms.ValidationError('Такой вариант уже существует в добавьте уникальный цвет')
+
 
 
 class SizeForm(forms.ModelForm):

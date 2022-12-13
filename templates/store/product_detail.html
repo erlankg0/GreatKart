@@ -19,61 +19,70 @@
 
                         </article> <!-- gallery-wrap .end// -->
                     </aside>
-                    <form id="product" class="col-md-6 border-left" autocomplete="off">
+                    <div class="col-md-6 border-left">
+                        <form id="product" autocomplete="off">
+                            <article class="content-body">
+                                <h3 class="title">Бренд: {{ product.brand.name }}</h3>
 
-                        <article class="content-body">
-                            <h3 class="title">Бренд: {{ product.brand.name }}</h3>
+                                <h4 class="section-title">{{ product.name }}</h4>
 
-                            <h4 class="section-title">{{ product.name }}</h4>
-
-                            <div class="mb-3">
-                                <var class="price h4" id="price">Цена: ${{ product.price }}</var>
-                            </div>
-
-                            <dl>
-                                <dt>Описание</dt>
-                                <dd><p>{{ product.description }}</p></dd>
-                                <hr>
-                                <div class="row">
-                                    <div class="item-option-select">
-                                        <h6>Выбор цвета</h6>
-                                        <select name="color" id="select-color" class="form-control">
-                                            <option class="form-control">Выбор цвета</option>
-                                            {% for product_color in product.variant_product.all %}
-                                                <option class="form-control"
-                                                        value="{{ product_color.color.id }}">{{ product_color.color }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div> <!-- row.// -->
-                                <div class="row">
-                                    <div class="item-option-select">
-                                        <h6>Выбор размера</h6>
-                                        <select name="size" id='size' class="form-control">
-                                            <option class="form-control">Выбор размера</option>
-                                        </select>
-                                    </div>
-                                </div> <!-- row.// -->
-                                <div class="row">
-                                    <h5>Нравится :{{ product.like_set.count }}</h5>
+                                <div class="mb-3">
+                                    <span class="price h4" id="price">Цена: ${{ product.price }}</span>
                                 </div>
+
+                                <dl>
+                                    <dt>Описание</dt>
+                                    <dd><p>{{ product.description }}</p></dd>
+                                </dl>
                                 <hr>
-                                <div class="row">
-                                    <button class="btn btn-danger">Нравится</button>
+
+                                <div class="item-option-select">
+                                    <h6>Выбор цвета</h6>
+                                    <select name="color" id="select-color" class="form-control">
+                                        <option class="form-control">Выбор цвета</option>
+                                        {% for variant in product.product_variants.all %}
+                                            <option class="form-control"
+                                                    value="{{ variant.id }}">{{ variant.color }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+
+                                <div class="item-option-select">
+                                    <h6>Выбор размера</h6>
+                                    <select name="size" id='size' class="form-control">
+                                        <option class="form-control">Выбор размера</option>
+                                    </select>
                                 </div>
 
                                 <hr>
+                                <div class="mb-3">
+                                    <var class="h4" id="quantity"></var>
+                                </div>
                                 {% if product.stock <= 0 %}
                                     <h2 class="text-danger">Нету в наличии</h2>
                                 {% else %}
                                     <a href="/" class="btn  btn-primary"> <span
-                                            class="text">Добавить в корзину</span> <i class="fas fa-shopping-cart"></i>
+                                            class="text">Добавить в корзину</span> <i
+                                            class="fas fa-shopping-cart"></i>
                                     </a>
                                 {% endif %}
-
-                        </article> <!-- product-info-aside .// -->
-
-                    </form> <!-- col.// -->
+                            </article> <!-- product-info-aside .// -->
+                        </form>
+                        {% if user.is_authenticated %}
+                            <article class="content-body">
+                                <form method="post">
+                                    <div class="col-md-6">
+                                        {% csrf_token %}
+                                        <input name="user" value="{{ user }}" hidden>
+                                        <h5>Нравится :{{ product.like_set.count }}</h5>
+                                        <button class="btn btn-danger">Нравится</button>
+                                    </div>
+                                </form>
+                            </article>
+                        {% endif %}
+                    </div><!-- col.// -->
                 </div> <!-- row.// -->
             </div> <!-- card.// -->
             <!-- ============================ COMPONENT 1 END .// ================================= -->
@@ -114,37 +123,4 @@
         </div> <!-- container .//  -->
     </section>
     <!-- ========================= SECTION CONTENT END// ========================= -->
-    <script>
-        $("#product select[name='color']").on('change', function () {
-            var $this = $(this);
-            if ($this.val() !== '') {
-                $.ajax({
-
-                    url: '/api/' + '{{ product.id }}/' + $this.val(),
-                    type: 'GET',
-
-                    success: function (resp) {
-                        let options = '';
-                        if ($('#size').find('option').length <= 1) {
-                            console.log(options);
-                        } else {
-                            $('#size').find('option').nextAll().remove();
-                        }
-                        resp.data.forEach(data => {
-                            $('#size').append($('<option>', {
-                                value: data.size,
-                                text: data.size__size
-                            }));
-                            $('#price').value = resp.data.price;
-                        });
-                    },
-                    error: function (resp) {
-                        console.log('Something went wrong');
-                    }
-                });
-            } else {
-                $("#product select[id='size']").find('.form-control').nextAll().extend('Выбор размера').remove()
-            }
-        });
-    </script>
 {% endblock %}

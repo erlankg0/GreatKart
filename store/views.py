@@ -1,9 +1,10 @@
 from django.db.models import Q
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import render
 from django.views import View
 from django.views.generic import ListView
 
-from store.models import Product, CategoryMPTT
+from store.models import Product, CategoryMPTT, ProductVariant, Brand, Size, Color
 
 
 class HomeView(ListView):
@@ -70,17 +71,33 @@ class DetailProduct(View):
         return render(request, 'store/product_detail.html', context={'product': product})
 
 
-# AJAX запрос для загрузки все варианты цвета и размера
-def get_product(request, product_slug):
-    if is_ajax(request):
-        try:
-            product = Product.objects.get(slug=product_slug)
-        except ConnectionError as Error:
-            raise ConnectionError("Link not Fount")
-        return render(request, 'store/product_detail.html', context={'product': product})
-    else:
-        raise ConnectionError("Link not Fount")
-
-# is_ajax(request) - проверка на AJAX запрос
-def is_ajax(request):
+def is_ajax(request):  # проверка на ajax запрос
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+
+
+# ajax запрос для size в ProductVariant
+def get_size(request, variant_id):
+    if is_ajax(request):
+        variant = ProductVariant.objects.get(id=variant_id)  # получаю вариант продукта
+        size = variant.size.all().values()  # получаю все значения size
+        return JsonResponse({'size': list(size)})  # возвращаю json
+    else:
+        # return HttpResponseBadRequest()  # если не ajax запрос то вернет 400
+        variant = ProductVariant.objects.get(id=variant_id)  # получаю вариант продукта
+        size = variant.size.all().values()  # получаю все значения size
+        return JsonResponse({'size': list(size)})  # возвращаю json
+
+
+# ajax запрос для получения цены у size
+def get_price(request, size_id):
+    print("AJAX")
+    if is_ajax(request):
+        size = Size.objects.get(id=size_id)
+        price = size.price
+        quantity = size.quantity
+        return JsonResponse({'price': price, 'quantity': quantity})
+    else:
+        size = Size.objects.get(id=size_id)
+        price = size.price
+        quantity = size.quantity
+        return JsonResponse({'price': price, 'quantity': quantity})

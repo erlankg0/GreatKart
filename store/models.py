@@ -277,6 +277,7 @@ class Color(models.Model):
         max_length=255,
         verbose_name='Color',
         help_text='Max 255 symbols, unique e.g. "Black"',
+        unique=True,
     )  # Цвет
 
     def __str__(self):  # Возвращает цвет
@@ -309,7 +310,7 @@ class ProductVariant(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Product',
         help_text='Product',
-        related_name='variants',
+        related_name='product_variants',
     )  # Продукт
     name = models.CharField(
         max_length=255,
@@ -327,7 +328,7 @@ class ProductVariant(models.Model):
         Size,
         verbose_name='Size',
         help_text='Size',
-        related_name='variants',
+        related_name='variants_size',
     )  # Размер
     image = models.ImageField(
         upload_to='products/product_variant/',
