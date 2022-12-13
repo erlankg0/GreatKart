@@ -222,6 +222,9 @@ class Product(models.Model):
     def get_view_count(self):  # Возвращает количество просмотров
         return self.view.count()
 
+    def get_popular_products(self):  # Возвращает популярные продукты
+        return self.objects.filter(is_active=True).order_by('-view')
+
     def __str__(self):  # Возвращает название продукта
         return self.title
 

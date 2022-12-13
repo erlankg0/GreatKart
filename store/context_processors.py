@@ -25,6 +25,7 @@ def get_products(request):
     return dict(products=products)
 
 
-def categories_(request):
-    categories = CategoryMPTT.objects.all()
-    return dict(categories_=categories)
+def get_current_ip(request):
+    # получить текущий ip адрес
+    ip = request.META['REMOTE_ADDR']
+    return dict(ip=ip)

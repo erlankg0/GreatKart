@@ -55,8 +55,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'store.context_processors.get_current_ip',
                 'store.context_processors.get_categories_context_mptt',  # контекст процессор (категорий)
-                'store.context_processors.categories_',  # контекст процессор (категорий)
                 'store.context_processors.get_sizes',  # контекст процессор (размеров)
                 'store.context_processors.get_brands'  # контекст процессор (брендов)
             ],

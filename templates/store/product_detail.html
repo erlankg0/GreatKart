@@ -60,26 +60,29 @@
                                 <div class="mb-3">
                                     <var class="h4" id="quantity"></var>
                                 </div>
-                                {% if product.stock <= 0 %}
-                                    <h2 class="text-danger">Нету в наличии</h2>
+                                {% if user.is_authenticated %}
+                                    {% if product.stock <= 0 %}
+                                        <h2 class="text-danger">Нету в наличии</h2>
+                                    {% else %}
+                                        <a href="/" class="btn  btn-primary"> <span
+                                                class="text">Добавить в корзину</span> <i
+                                                class="fas fa-shopping-cart"></i>
+                                        </a>
+                                    {% endif %}
                                 {% else %}
-                                    <a href="/" class="btn  btn-primary"> <span
-                                            class="text">Добавить в корзину</span> <i
-                                            class="fas fa-shopping-cart"></i>
+                                    <a href="{% url 'sign_in' %}" class="btn  btn-primary btn-info"> <span
+                                            class="text">Для покупки нужна авторизация.</span>
                                     </a>
                                 {% endif %}
                             </article> <!-- product-info-aside .// -->
                         </form>
                         {% if user.is_authenticated %}
                             <article class="content-body">
-                                <form method="post">
-                                    <div class="col-md-6">
-                                        {% csrf_token %}
-                                        <input name="user" value="{{ user }}" hidden>
-                                        <h5>Нравится :{{ product.like_set.count }}</h5>
-                                        <button class="btn btn-danger">Нравится</button>
-                                    </div>
-                                </form>
+                                <div class="col-md-6">
+                                    <button class="btn btn-danger" id="like"
+                                            data-like="{% url 'add_like' product.id ip %}">Нравится
+                                    </button>
+                                </div>
                             </article>
                         {% endif %}
                     </div><!-- col.// -->
@@ -123,4 +126,13 @@
         </div> <!-- container .//  -->
     </section>
     <!-- ========================= SECTION CONTENT END// ========================= -->
+    <script>
+        $("#like").click(function () {
+            const url = $("#like").attr("data-like");  // get the url of the `load_provinces` view
+            $.ajax({                       // initialize an AJAX request
+                url: url,
+            });
+        });
+
+    </script>
 {% endblock %}

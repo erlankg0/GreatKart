@@ -1,6 +1,6 @@
 from django import forms
-from store.models import Product, ProductVariant, CategoryMPTT, Brand, Size, Color
-from django.db.models import Q
+
+from store.models import ProductVariant, Size, Color, Like
 
 
 class ColorForm(forms.ModelForm):
@@ -35,7 +35,6 @@ class ProductVariantForm(forms.ModelForm):
             raise forms.ValidationError('Такой вариант уже существует в добавьте уникальный цвет')
 
 
-
 class SizeForm(forms.ModelForm):
     class Meta:
         model = Size
@@ -49,3 +48,9 @@ class SizeForm(forms.ModelForm):
                 }
             )
         }
+
+
+class LikeForm(forms.ModelForm):
+    class Meta:
+        model = Like
+        fields = '__all__'

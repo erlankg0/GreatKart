@@ -34,7 +34,7 @@
                             <div class="filter-content collapse show" id="collapse_1" style="">
                                 <div class="card-body">
                                     <ul class="list-menu">
-                                        {% recursetree categories_ %}
+                                        {% recursetree categories_mptt %}
                                             <li>
                                                 <strong> <a
                                                         href="{{ node.get_absolute_url }}">{{ node.title }}</a></strong>
@@ -85,7 +85,7 @@
                                     {% for size in sizes %}
                                         <label class="checkbox-btn">
                                             <input type="checkbox">
-                                            <span class="btn btn-light"> {{ size }} </span>
+                                            <span class="btn btn-light"> {{ size.size }} </span>
                                         </label>
                                     {% endfor %}
                                 </div><!-- card-body.// -->
@@ -155,7 +155,7 @@
                                     </div> <!-- img-wrap.// -->
                                     <figcaption class="info-wrap">
                                         <div class="fix-height">
-                                             <a class="sub-title">
+                                            <a class="sub-title">
                                                 {{ product.brand }}
                                             </a>
                                             <a href="{{ product.get_absolute_url }}"
@@ -201,10 +201,16 @@
                                            href="?page={{ page_obj.previous_page_number }}">Previous</a>
                                     </li>
                                 {% endif %}
-                                {% for page in page_obj %}
-                                    <li class="page-item active">
-                                        <a class="page-link" href="?page={{ page }}">{{ page }}</a>
-                                    </li>
+                                {% for page in paginator.page_range %}
+                                    {% if page_obj.number == page %}
+                                        <li class="page-item active"><a class="page-link"
+                                                                        href="?page={{ page }}">{{ page }}</a>
+                                        </li>
+                                    {% elif page >= page_obj.number|add:-2 and page <= page_obj.number|add:2 %}
+                                        <li class="page-item"><a class="page-link"
+                                                                 href="?page={{ page }}">{{ page }}</a>
+                                        </li>
+                                    {% endif %}
                                 {% endfor %}
                                 {% if page_obj.has_next %}
                                     <li class="page-item">
