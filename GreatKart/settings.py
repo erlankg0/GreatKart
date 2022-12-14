@@ -1,4 +1,5 @@
 from pathlib import Path
+from decouple import config
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -124,3 +125,43 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.mailtrap.io'
+EMAIL_HOST_USER = '4b80498e15b82e'
+EMAIL_HOST_PASSWORD = 'f59f43970a87d6'
+EMAIL_PORT = '2525'
+
+"""# Подключение к Redis
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+# Подключение к Celery
+CELERY_BROKER_URL = 'redis://
+CELERY_RESULT_BACKEND = 'redis://
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+# Подключение к Celery Beat
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+# Подключение к Celery Flower
+CELERY_FLOWER_BASIC_AUTH = ['admin:admin']
+
+# Подключение к Celery Flower
+CELERY_FLOWER_BASIC_AUTH = ['admin:admin']
+
+"""
+
+
+
+# Константы
+CART_SESSION_ID = 'cart'
