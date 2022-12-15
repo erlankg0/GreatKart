@@ -148,82 +148,95 @@
 
                             <div class="col-md-4">
                                 <figure class="card card-product-grid">
-                                    <div class="img-wrap owl-carousel owl-theme">
-                                        {% for image in product.images_product.all %}
-                                            <img src="{{ image.image.url }}" alt="{{ product.title }}">
-                                        {% endfor %}
-                                    </div> <!-- img-wrap.// -->
-                                    <figcaption class="info-wrap">
-                                        <div class="fix-height">
-                                            <a class="sub-title">
-                                                {{ product.brand }}
+                                    {% if product.images_product.count > 0 %}
+                                        <div class="img-wrap owl-carousel owl-theme">
+                                            {% for image in product.images_product.all %}
+                                                <a href="{{ product.get_absolute_url }}">
+                                                    <img src="{{ image.image.url }}" alt="{{ product.title }}">
+                                                </a>
+                                            {% endfor %}
+                                        </div> <!-- img-wrap.// -->
+                                    {% else %}
+                                        <div class="img-wrap">
+                                            <a href="{{ product.get_absolute_url }}">
+                                                <img src="{{ product.image.url }}" alt="{{ product.title }}">
                                             </a>
-                                            <a href="{{ product.get_absolute_url }}"
-                                               class="title">{{ product.title }}
-                                            </a>
-                                            <div class="price-wrap mt-2">
-                                                <span class="price">${{ product.price }}</span>
-                                            </div> <!-- price-wrap.// -->
-                                        </div>
-                                        <a href="#" class="btn btn-block btn-primary">Купить</a>
-                                        <a href="#" class="btn btn-block btn-success">Added to cart </a>
-                                    </figcaption>
-                                </figure>
+                                        </div> <!-- img-wrap.// -->
+                                    {% endif %}
+                            <figcaption class="info-wrap">
+                                <div class="">
+                                    <a class="sub-title" href="{{ product.brand.get_absolute_url }}">
+                                        {{ product.brand }}
+                                    </a>
+                                    <a href="{{ product.get_absolute_url }}"
+                                       class="title">{{ product.title }}
+                                    </a>
+                                    {% if product.discount > 0 %}
+                                        <p class="price">Цена: ${{ product.get_discount_price }}</p>
+                                        <span class="price-old text-danger">Скидка: %{{ product.discount }}</span>
+                                    {% else %}
+                                        <p class="price">Цена: ${{ product.price }}</p>
+                                    {% endif %}
+                                </div>
+                                <a href="#" class="btn btn-block btn-primary">Купить</a>
+                                <a href="#" class="btn btn-block btn-success">Added to cart </a>
+                            </figcaption>
+                            </figure>
                             </div> <!-- col.// -->
                         {% endfor %}
-                        <div class="col-md-4">
-                            <figure class="card card-product-grid">
-                                <div class="img-wrap">
-                                    <img src="{% static 'images/items/1.jpg' %}">
+                    <div class="col-md-4">
+                        <figure class="card card-product-grid">
+                            <div class="img-wrap">
+                                <img src="{% static 'images/items/1.jpg' %}">
 
-                                </div> <!-- img-wrap.// -->
-                                <figcaption class="info-wrap">
-                                    <div class="fix-height">
-                                        <a href="./product-detail.html" class="title">Product name goes here just for
-                                            demo item</a>
-                                        <div class="price-wrap mt-2">
-                                            <span class="price">$1280</span>
-                                        </div> <!-- price-wrap.// -->
-                                    </div>
-                                    <a href="#" class="btn btn-block btn-primary">Add to cart </a>
-                                </figcaption>
-                            </figure>
-                        </div>
-                    </div> <!-- row end.// -->
+                            </div> <!-- img-wrap.// -->
+                            <figcaption class="info-wrap">
+                                <div class="fix-height">
+                                    <a href="./product-detail.html" class="title">Product name goes here just for
+                                        demo item</a>
+                                    <div class="price-wrap mt-2">
+                                        <span class="price">$1280</span>
+                                    </div> <!-- price-wrap.// -->
+                                </div>
+                                <a href="#" class="btn btn-block btn-primary">Add to cart </a>
+                            </figcaption>
+                        </figure>
+                    </div>
+            </div> <!-- row end.// -->
 
 
-                    <nav class="mt-4" aria-label="Page navigation sample">
-                        <ul class="pagination">
-                            {% if page_obj.has_other_pages %}
-                                {% if page_obj.has_previous %}
-                                    <li class="page-item disabled">
-                                        <a class="page-link"
-                                           href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                                    </li>
-                                {% endif %}
-                                {% for page in paginator.page_range %}
-                                    {% if page_obj.number == page %}
-                                        <li class="page-item active"><a class="page-link"
-                                                                        href="?page={{ page }}">{{ page }}</a>
-                                        </li>
-                                    {% elif page >= page_obj.number|add:-2 and page <= page_obj.number|add:2 %}
-                                        <li class="page-item"><a class="page-link"
-                                                                 href="?page={{ page }}">{{ page }}</a>
-                                        </li>
-                                    {% endif %}
-                                {% endfor %}
-                                {% if page_obj.has_next %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-                                    </li>
-                                {% endif %}
+            <nav class="mt-4" aria-label="Page navigation sample">
+                <ul class="pagination">
+                    {% if page_obj.has_other_pages %}
+                        {% if page_obj.has_previous %}
+                            <li class="page-item disabled">
+                                <a class="page-link"
+                                   href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                        {% endif %}
+                        {% for page in paginator.page_range %}
+                            {% if page_obj.number == page %}
+                                <li class="page-item active"><a class="page-link"
+                                                                href="?page={{ page }}">{{ page }}</a>
+                                </li>
+                            {% elif page >= page_obj.number|add:-2 and page <= page_obj.number|add:2 %}
+                                <li class="page-item"><a class="page-link"
+                                                         href="?page={{ page }}">{{ page }}</a>
+                                </li>
                             {% endif %}
-                        </ul>
-                    </nav>
+                        {% endfor %}
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+            </nav>
 
-                </main> <!-- col.// -->
+            </main> <!-- col.// -->
 
-            </div>
+        </div>
 
         </div> <!-- container .//  -->
     </section>

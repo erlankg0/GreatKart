@@ -80,6 +80,7 @@ def is_ajax(request):  # проверка на ajax запрос
 
 
 def add_like(request, product_id, ip_address):  # ajax запрос для добавления лайка
+    print("Like")
     if is_ajax(request):  # проверка на ajax запрос
         product = Product.objects.get(id=product_id)  # получаю продукт
         ip = Ip.objects.get_or_create(ip=ip_address)[0]  # получаю ip адресс
@@ -106,11 +107,13 @@ def get_price(request, size_id):
     print("AJAX")
     if is_ajax(request):
         size = Size.objects.get(id=size_id)
-        price = size.price
+        price = size.get_price_with_discount()
+        discount = size.discount
         quantity = size.quantity
-        return JsonResponse({'price': price, 'quantity': quantity})
+        return JsonResponse({'price': price, 'quantity': quantity, 'discount': discount})
     else:
         size = Size.objects.get(id=size_id)
-        price = size.price
+        price = size.get_price_with_discount()
+        discount = size.discount
         quantity = size.quantity
-        return JsonResponse({'price': price, 'quantity': quantity})
+        return JsonResponse({'price': price, 'quantity': quantity, 'discount': discount})

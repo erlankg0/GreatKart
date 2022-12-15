@@ -9,18 +9,26 @@
                 <div class="row no-gutters">
                     <aside class="col-md-6">
                         <article class="gallery-wrap ">
-                            <div class="owl-carousel owl-theme">
-                                {% for image in product.images_product.all %}
-                                    <a href="#">
-                                        <img src="{{ image.image.url }}" alt="">
-                                    </a>
-                                {% endfor %}
-                            </div> <!-- img-big-wrap.// -->
-
+                            {% if product.images_product.count > 0 %}
+                                        <div class="img-wrap owl-carousel owl-theme">
+                                            {% for image in product.images_product.all %}
+                                                <a href="{{ product.get_absolute_url }}">
+                                                    <img src="{{ image.image.url }}" alt="{{ product.title }}">
+                                                </a>
+                                            {% endfor %}
+                                        </div> <!-- img-wrap.// -->
+                                    {% else %}
+                                        <div class="img-wrap">
+                                            <a href="{{ product.get_absolute_url }}">
+                                                <img src="{{ product.image.url }}" alt="{{ product.title }}">
+                                            </a>
+                                        </div> <!-- img-wrap.// -->
+                                    {% endif %}
                         </article> <!-- gallery-wrap .end// -->
                     </aside>
                     <div class="col-md-6 border-left">
                         <form id="product" autocomplete="off">
+                        {% csrf_token %}
                             <article class="content-body">
                                 <h3 class="title">Бренд: {{ product.brand.name }}</h3>
 
@@ -28,6 +36,7 @@
 
                                 <div class="mb-3">
                                     <span class="price h4" id="price">Цена: ${{ product.price }}</span>
+                                    <span class="price-wrap text-danger" id="discount"></span>
                                 </div>
 
                                 <dl>
@@ -35,27 +44,26 @@
                                     <dd><p>{{ product.description }}</p></dd>
                                 </dl>
                                 <hr>
-
-                                <div class="item-option-select">
-                                    <h6>Выбор цвета</h6>
-                                    <select name="color" id="select-color" class="form-control">
-                                        <option class="form-control">Выбор цвета</option>
-                                        {% for variant in product.product_variants.all %}
-                                            <option class="form-control"
-                                                    value="{{ variant.id }}">{{ variant.color }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-
-
-                                <div class="item-option-select">
-                                    <h6>Выбор размера</h6>
-                                    <select name="size" id='size' class="form-control">
-                                        <option class="form-control">Выбор размера</option>
-                                    </select>
-                                </div>
-
+                                {% if product.product_variants.all|length > 0 %}
+                                    <div class="item-option-select">
+                                        <h6>Выбор цвета</h6>
+                                        <select name="color" name="product_variant_id" id="select-color"
+                                                class="form-control">
+                                            <option class="form-control">Выбор цвета</option>
+                                            {% for variant in product.product_variants.all %}
+                                                <option class="form-control"
+                                                        value="{{ variant.id }}">{{ variant.color }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="item-option-select">
+                                        <h6>Выбор размера</h6>
+                                        <select name="size" id='size' class="form-control">
+                                            <option class="form-control">Выбор размера</option>
+                                        </select>
+                                    </div>
+                                {% endif %}
                                 <hr>
                                 <div class="mb-3">
                                     <var class="h4" id="quantity"></var>
@@ -64,10 +72,10 @@
                                     {% if product.stock <= 0 %}
                                         <h2 class="text-danger">Нету в наличии</h2>
                                     {% else %}
-                                        <a href="/" class="btn  btn-primary"> <span
-                                                class="text">Добавить в корзину</span> <i
-                                                class="fas fa-shopping-cart"></i>
-                                        </a>
+                                        <label for="product_variant"></label>
+                                        <input id="product_variant" name="product_variant" hidden>
+                                        <button type="submit" class="btn btn-primary ">Добавить в корзину <i
+                                                class="fas fa-shopping-cart"></i></button>
                                     {% endif %}
                                 {% else %}
                                     <a href="{% url 'sign_in' %}" class="btn  btn-primary btn-info"> <span
@@ -91,21 +99,18 @@
             <!-- ============================ COMPONENT 1 END .// ================================= -->
 
             <br>
-
             <div class="row">
                 <div class="col-md-9">
 
                     <header class="section-heading">
-                        <h3>Customer Reviews </h3>
-
+                        <h3>Отзывы покупателей. </h3>
                     </header>
-
                     <article class="box mb-3">
                         <div class="icontext w-100">
                             <img src="{% static 'images/avatars/avatar1.jpg' %}" class="img-xs icon rounded-circle">
                             <div class="text">
                                 <span class="date text-muted float-md-right">24.04.2020 </span>
-                                <h6 class="mb-1">Mike John </h6>
+                                <h6 class="mb-1">Mike John</h6>
 
                             </div>
                         </div> <!-- icontext.// -->
@@ -117,8 +122,6 @@
                             </p>
                         </div>
                     </article>
-
-
                 </div> <!-- col.// -->
             </div> <!-- row.// -->
 
@@ -127,10 +130,64 @@
     </section>
     <!-- ========================= SECTION CONTENT END// ========================= -->
     <script>
+        // Это все для HTML страницы ProductDetails (подробное описание товара)
+        $("#product select[name='color']").on('change', function () {
+            var $this = $(this); // сохраняем в переменную текущий элемент
+            $("#product_variant").val($this.val()) // очищаем select
+            $.ajax({ // инициализируем ajax запрос
+                // получаем value текущего элемента
+                url: '/shop/variant/' + $this.val() + '/', // указываем url
+                type: 'GET', // тип запроса
+
+                success: function (resp) { // вешаем свой обработчик на функцию success (успешный ответ сервера)
+                    let options = '';
+                    if ($('#size').find('option').length > 1) { // если в селекте уже есть опции, то удаляем их
+                        $('#size').find('option').nextAll().remove(); // удаляем все опции кроме первой
+                    }
+                    resp.size.forEach(size => {
+                        $('#size').append($('<option>', {
+                            value: size.id,
+                            text: size.size
+                        }));
+                    });
+                },
+                error: function (resp) {
+                    console.log('Something went wrong'); // выводим ошибку в консоль
+                }
+            });
+        });
+        // при выборе цвета, делаем ajax запрос на сервер, получаем размеры и добавляем их в селект
+        $("#product select[id='size']").on("change", function () {
+            var $this = $(this); // сохраняем в переменную текущий элемент
+            $.ajax({ // инициализируем ajax запрос
+                // получаем value текущего элемента
+                url: '/shop/size/' + $this.val() + '/price/quantity/', // указываем url для получения цены и количества
+                type: 'GET', // тип запроса
+                // изменять значение поля price при каждом запросе
+                success: function (resp) { // вешаем свой обработчик на функцию success (успешный ответ сервера)
+                    // изменить значение тега span с id price
+                    if (resp.discount > 0) {
+                        $('#price').text("Цена $" + resp.price);
+                        $('#discount').text("% " + resp.discount);
+                    } else if (resp.discount === 0) {
+                        $('#price').text("Цена" + resp.price);
+                        $("#discount").text("");
+                    }
+                    $('#quantity').text("Количество: " + resp.quantity);  // изменить значение тега id quantity на количество
+                },
+                error: function (resp) {
+                    console.log('Something went wrong');
+                }
+            });
+        });
+
         $("#like").click(function () {
             const url = $("#like").attr("data-like");  // get the url of the `load_provinces` view
             $.ajax({                       // initialize an AJAX request
                 url: url,
+                success: function (data) {
+                    $("#like").className = "btn btn-success";
+                }
             });
         });
 

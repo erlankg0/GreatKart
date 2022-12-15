@@ -25,11 +25,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'cart.apps.CartConfig',  # приложения корзины
     'store.apps.StoreConfig',  # приложения продуктов (item)
     'accounts.apps.AccountsConfig',  # приложения для управления аккаунтами
     'mptt',  # MPTT
     'django_mptt_admin',  # MPTT admin
+    'cart.apps.CartConfig',  # приложения корзины
 ]
 
 MIDDLEWARE = [
@@ -161,7 +161,5 @@ CELERY_FLOWER_BASIC_AUTH = ['admin:admin']
 
 """
 
-
-
 # Константы
-CART_SESSION_ID = 'cart'
+CART_SESSION_ID = 'cart' # Ключ сессии для корзины покупок (для хранения в сессии)
