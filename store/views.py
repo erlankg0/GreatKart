@@ -1,12 +1,13 @@
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponseNotAllowed
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
-from django.urls import reverse
 from django.views import View
-from django.views.generic import ListView, FormView, CreateView
+from django.views.generic import ListView
 
+from cart.forms import CartAddProductForm
 from store.models import Product, CategoryMPTT, ProductVariant, Size, Like, Ip
-from store.forms import LikeForm
+from django.contrib import messages
 
 
 class HomeView(ListView):
@@ -68,9 +69,11 @@ class DetailProduct(View):
             product = Product.objects.get(
                 slug=product_slug,
             )
+            cart_product_form = CartAddProductForm()  # получение формы
         except ConnectionError:
             raise ConnectionError("Link not Fount")
-        return render(request, 'store/product_detail.html', context={'product': product, })
+        return render(request, 'store/product_detail.html',
+                      context={'product': product, 'cart_product_form': cart_product_form})
 
 
 # AJAXs
@@ -79,7 +82,14 @@ def is_ajax(request):  # проверка на ajax запрос
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 
 
+def add_to_cart(request, id, slug):  # добавление товара в корзину
+    if is_ajax(request):  # проверка на ajax запрос
+        return JsonResponse(
+            {"message": 'Товар добавлен в корзину'})  # возвращение json ответа
+
+
 def add_like(request, product_id, ip_address):  # ajax запрос для добавления лайка
+    print("Like")
     if is_ajax(request):  # проверка на ajax запрос
         product = Product.objects.get(id=product_id)  # получаю продукт
         ip = Ip.objects.get_or_create(ip=ip_address)[0]  # получаю ip адресс
@@ -106,11 +116,13 @@ def get_price(request, size_id):
     print("AJAX")
     if is_ajax(request):
         size = Size.objects.get(id=size_id)
-        price = size.price
+        price = size.get_price_with_discount()
+        discount = size.discount
         quantity = size.quantity
-        return JsonResponse({'price': price, 'quantity': quantity})
+        return JsonResponse({'price': price, 'quantity': quantity, 'discount': discount})
     else:
         size = Size.objects.get(id=size_id)
-        price = size.price
+        price = size.get_price_with_discount()
+        discount = size.discount
         quantity = size.quantity
-        return JsonResponse({'price': price, 'quantity': quantity})
+        return JsonResponse({'price': price, 'quantity': quantity, 'discount': discount})

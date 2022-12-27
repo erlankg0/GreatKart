@@ -168,6 +168,11 @@ class Product(models.Model):
         help_text='Regular price Nike Air Max 270 100$',
         default=0,
     )  # Цена
+    discount = models.PositiveSmallIntegerField(
+        verbose_name='Discount',
+        help_text='Discount Nike Air Max 270 10%',
+        default=0,
+    )  # Скидка
     image = models.ImageField(
         upload_to=directory_image_path,
         verbose_name='Image',
@@ -212,6 +217,9 @@ class Product(models.Model):
         help_text='Max 100 symbols, unique e.g. "nike-air-max-270"',  # URL
         unique=True,
     )  # URL продукта
+
+    def get_discount_price(self):  # Возвращает цену с учетом скидки
+        return self.price - (self.price * self.discount / 100)
 
     def get_absolute_url(self):  # Возвращает абсолютный URL продукта
         return reverse('detail_product', args=[self.slug])

@@ -120,3 +120,45 @@ class Account(AbstractUser):
                 return phone  # возвращает номер телефона
             else:
                 raise ValidationError("Номер телефона не корректен")  # исключение валидации номера телефона
+
+
+class Address(models.Model):
+    user = models.OneToOneField(
+        Account,
+        on_delete=models.CASCADE,
+        related_name='address_user',
+        verbose_name='Адрес пользователя'
+    )  # связь с моделью пользователя
+    country = models.CharField(
+        verbose_name='Страна',
+        max_length=50
+    )  # страна
+    city = models.CharField(
+        verbose_name='Город',
+        max_length=50
+    )  # город
+    street = models.CharField(
+        verbose_name='Улица',
+        max_length=50
+    )  # улица
+    house = models.CharField(
+        verbose_name='Дом',
+        max_length=50
+    )  # дом
+    apartment = models.CharField(
+        verbose_name='Квартира',
+        max_length=50,
+        blank=True,
+        null=True
+    )  # квартира
+
+    def __str__(self):
+        return f'{self.country}, {self.city}, {self.street}, {self.house}, {self.apartment}'
+
+    def get_user(self):
+        return self.user
+
+    class Meta:
+        verbose_name = 'Адрес'
+        verbose_name_plural = 'Адреса'
+        db_table = 'address'
