@@ -10,25 +10,25 @@
                     <aside class="col-md-6">
                         <article class="gallery-wrap ">
                             {% if product.images_product.count > 0 %}
-                                        <div class="img-wrap owl-carousel owl-theme">
-                                            {% for image in product.images_product.all %}
-                                                <a href="{{ product.get_absolute_url }}">
-                                                    <img src="{{ image.image.url }}" alt="{{ product.title }}">
-                                                </a>
-                                            {% endfor %}
-                                        </div> <!-- img-wrap.// -->
-                                    {% else %}
-                                        <div class="img-wrap">
-                                            <a href="{{ product.get_absolute_url }}">
-                                                <img src="{{ product.image.url }}" alt="{{ product.title }}">
-                                            </a>
-                                        </div> <!-- img-wrap.// -->
-                                    {% endif %}
-                        </article> <!-- gallery-wrap .end// -->
+                                <div class="img-wrap owl-carousel owl-theme">
+                                    {% for image in product.images_product.all %}
+                                        <a href="{{ product.get_absolute_url }}">
+                                            <img src="{{ image.image.url }}" alt="{{ product.title }}">
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="img-wrap">
+                                    <a href="{{ product.get_absolute_url }}">
+                                        <img src="{{ product.image.url }}" alt="{{ product.title }}">
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </article>
                     </aside>
                     <div class="col-md-6 border-left">
-                        <form id="product" autocomplete="off">
-                        {% csrf_token %}
+                        <form id="product" autocomplete="off" method="post" action="{% url 'cart_add' product.id %}">
+                            {% csrf_token %}
                             <article class="content-body">
                                 <h3 class="title">Бренд: {{ product.brand.name }}</h3>
 
@@ -68,13 +68,15 @@
                                 <div class="mb-3">
                                     <var class="h4" id="quantity"></var>
                                 </div>
+                                {{ cart_product_form.quantity }}
                                 {% if user.is_authenticated %}
                                     {% if product.stock <= 0 %}
                                         <h2 class="text-danger">Нету в наличии</h2>
                                     {% else %}
-                                        <label for="product_variant"></label>
-                                        <input id="product_variant" name="product_variant" hidden>
-                                        <button type="submit" class="btn btn-primary ">Добавить в корзину <i
+                                        {#                                        <label for="product_variant"></label>#}
+                                        {#                                        <input id="product_variant" name="product_variant" hidden>#}
+                                        <button type="submit"
+                                                class="btn btn-primary ">Добавить в корзину <i
                                                 class="fas fa-shopping-cart"></i></button>
                                     {% endif %}
                                 {% else %}
@@ -82,7 +84,8 @@
                                             class="text">Для покупки нужна авторизация.</span>
                                     </a>
                                 {% endif %}
-                            </article> <!-- product-info-aside .// -->
+                            </article>
+                            <input name="product" value="{{ product.id }}" hidden>
                         </form>
                         {% if user.is_authenticated %}
                             <article class="content-body">

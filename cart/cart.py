@@ -3,62 +3,78 @@ from django.conf import settings
 from store.models import Product, ProductVariant
 
 
-# Корзина
-class Cart(object):
-    """Корзина"""
+class Cart:
+    """Класс корзины"""
 
     def __init__(self, request):
-        """Инициализация"""
-        """(Конструктор корзины) Инициализация корзины"""
-        self.session = request.session.get(
-            settings.CART_SESSION_ID)  # получаем корзину из сессии (если есть) или создаем новую
-        if not self.session:  # если корзины нет в сессии
-            self.session = request.session[settings.CART_SESSION_ID] = {}  # создаем новую корзину в сессии
-            self.cart = self.session  # корзина
-        else:
-            self.cart = self.session  # корзина (если есть в сессии) просто получаем ее
+        """Инициализация корзины"""
+        self.session = request.session  # получаем сессию
+        cart = self.session.get(settings.CART_SESSION_ID)  # получаем корзину из сессии или создаем новую корзину
+        print('Cart init: cart = {}'.format(cart))
+        if not cart:  # если корзины нет, то создаем ее
+            cart = self.session[
+                settings.CART_SESSION_ID] = {}  # создаем корзину в сессии и присваиваем ее переменной cart
+        self.cart = cart  # присваиваем корзину атрибуту класса
 
-    def add(self, product_variant, quantity=1, update_quantity=False):
+    def add(self, product, product_variant=None, quantity=1, update_quantity=False):
         """Добавление товара в корзину"""
-        """(Метод add) Добавление товара в корзину"""
-        product_variant_id = str(product_variant.id)  # получаем id товара
-        if product_variant_id not in self.cart:
-            self.cart[product_variant_id] = {'quantity': 0, 'price': str(
-                product_variant.size.get_price_with_discount())}  # добавляем товар в корзину
-        else:
-            self.cart[product_variant_id][
-                'quantity'] += quantity  # если товар уже есть в корзине, то увеличиваем количество
-        self.save()  # сохраняем корзину
-
-    def remove(self, product_variant):
-        """Удаление товара из корзины"""
-        """(Метод remove) Удаление товара из корзины"""
-        product_variant_id = str(product_variant.id)
-        if product_variant_id in self.cart:
-            del self.cart[product_variant_id]
-            self.save()
-
-    def __iter__(self):
-        """Итератор"""
-        """(Метод __iter__) Итератор"""
-        product_variant_ids = self.cart.keys()  # получаем id товаров по ключам словаря self.cart (корзины)
-        product_variants = ProductVariant.objects.filter(
-            id__in=product_variant_ids)  # получаем товары по id это список товаров
-        for product_variant in product_variants:  # перебираем товары по списку
-            self.cart[str(product_variant.id)][
-                'product_variant'] = product_variant  # добавляем товар в корзину по ключу id
-
-        for item in self.cart.values():  # перебираем значения словаря self.cart (корзины)
-            item['price'] = Decimal(item['price'])  # цена товара
-            item['total_price'] = item['price'] * item['quantity']  # общая цена товара
-            yield item  # возвращаем значение общей цены товаров в корзине def get_total_price(self):
-
-    def get_total_price(self):
-        """Получение общей цены товаров в корзине"""
-        """(Метод get_total_price) Получение общей цены товаров в корзине"""
-        return sum(Decimal(item['price']) * item['quantity'] for item in self.cart.values())
+        product_id = str(product.id)  # получаем id товара
+        product_variant_id = str(product_variant.id) if product_variant else None  # получаем id варианта товара
+        if product_id not in self.cart:  # если товара нет в корзине, то добавляем его
+            self.cart[product_id] = {'quantity': 0, 'price': str(product.price)}
+        if product_variant_id:
+            if 'variants' not in self.cart[product_id]:
+                self.cart[product_id]['variants'] = {}  # создаем словарь вариантов товара
+            if product_variant_id not in self.cart[product_id][
+                'variants']:  # если варианта товара нет в корзине, то добавляем его
+                self.cart[product_id]['variants'][product_variant_id] = {'quantity': 0,
+                                                                         'price': str(product_variant.price)
+                                                                         }  # добавляем вариант товара в корзину
+            if update_quantity:  # если нужно обновить количество товара
+                self.cart[product_id]['variants'][product_variant_id][
+                    'quantity'] = quantity  # обновляем количество товара
+            else:  # если нужно добавить количество товара
+                self.cart[product_id]['variants'][product_variant_id][
+                    'quantity'] += quantity  # увеличиваем количество товара
+                self.save()
 
     def save(self):
         """Сохранение корзины"""
-        """(Метод save) Сохранение корзины"""
+        # обновляем сессию cart
+        self.session[settings.CART_SESSION_ID] = self.cart
+        # помечаем сессию как "измененную", чтобы убедиться, что она будет сохранена
+        self.session.modified = True
+
+    def remove(self, product):
+        """Удаление товара из корзины"""
+        product_id = str(product.id)
+        if product_id in self.cart:
+            del self.cart[product_id]
+            self.save()
+
+    def __iter__(self):
+        """Итерация по товарам в корзине"""
+        product_ids = self.cart.keys()
+        # получаем объекты модели Product и передаем их в корзину
+        products = Product.objects.filter(id__in=product_ids)
+        for product in products:
+            self.cart[str(product.id)]['product'] = product
+
+        for item in self.cart.values():
+            item['price'] = Decimal(item['price'])
+            item['total_price'] = item['price'] * item['quantity']
+            yield item
+
+    def __len__(self):
+        """Подсчет количества товаров в корзине"""
+        return sum(item['quantity'] for item in self.cart.values())
+
+    def get_total_price(self):
+        """Подсчет общей стоимости товаров в корзине"""
+        return sum(Decimal(item['price']) * item['quantity'] for item in self.cart.values())
+
+    def clear(self):
+        """Очистка корзины"""
+        # удаление корзины из сессии
+        del self.session[settings.CART_SESSION_ID]
         self.session.modified = True

@@ -1,12 +1,11 @@
 from django.urls import path
 
 """Просмотры Views"""
-from cart.views import cart, add_cart, remove_cart, remove_cart_item
+from .views import cart_add, cart_remove, cart_detail
 
 """Маршрутизатор URL"""
 urlpatterns = [
-    path('', cart, name='cart'),
-    path('add_cart/<int:product_id>/', add_cart, name='add_cart'),
-    path('remove/<int:product_id>/', remove_cart, name='remove_cart'),
-    path('remove_item/<int:product_id>/', remove_cart_item, name='remove_item'),
+    path('', cart_detail, name='cart_detail'),
+    path('add/<int:product>/', cart_add, name='cart_add'),
+    path('remove/<int:product_id>/', cart_remove, name='cart_remove'),
 ]
