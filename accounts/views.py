@@ -1,4 +1,7 @@
-from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView, PasswordChangeView, PasswordResetDoneView
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView, PasswordChangeView, \
+    PasswordResetDoneView
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
@@ -18,7 +21,7 @@ class SignInView(LoginView):
         return self.success_url
 
 
-class SignOutView(LogoutView):
+class SignOutView(LoginRequiredMixin, LogoutView):
     """Sign Out View"""
     template_name = 'store/index.html'
 
@@ -38,6 +41,13 @@ class ChangePasswordView(PasswordChangeView):
     success_url = reverse_lazy('home')
 
 
+# Change password done.
+class ChangePasswordDoneView(PasswordResetDoneView):
+    """Change Password Done View"""
+    template_name = 'accounts/change_password_done.html'
+    success_url = reverse_lazy('home')
+
+
 # Reset password.
 class ResetPasswordView(PasswordResetView):
     """Reset Password View"""
@@ -49,7 +59,3 @@ class ResetPasswordView(PasswordResetView):
 class DonePasswordResetView(PasswordResetDoneView):
     """Done Password Reset View"""
     template_name = 'accounts/done_password_reset.html'  # Done password reset.
-
-
-
-

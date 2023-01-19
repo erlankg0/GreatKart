@@ -51,6 +51,18 @@
                         <button type="submit" class="btn btn-primary btn-block"> Регистрация</button>
                     </div> <!-- form-group// -->
                 </form>
+                <!-- Errors -->
+                {% if form.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        <ul>
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
             </article><!-- card-body.// -->
         </div> <!-- card .// -->
         <p class="text-center mt-4">Есть учетная запись? <a href="">Вход</a></p>
